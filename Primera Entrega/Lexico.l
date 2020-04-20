@@ -1,27 +1,34 @@
-/* aca declaro las cosas que voy a usar include y variables globales y eso */
 %{
-  #include <iostream>
-  using namespace std;
-  extern int yylex(); /*esto se queda esperando una cadena y la parsea, despues puede volar*/
-%}
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include "y.tab.h"
+FILE  *yyin;
+int yylval;
 
-/* opciones de flex */
-%option noyywrap
+%}
+%option noyywrap  
+%option yylineno 
+
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
-/* Aca van las regex que reconocen tokens 
-y entre corchetes hay que tirar el return que agarra el programa de bison */
-%%
-"+"				{ cout << "OP_SUMA" << endl; } /*{ return OP_SUMA; }*/
-"-"				{ cout << "OP_RESTA" << endl; }/*{ return OP_RESTA; }*/
-"*"				{ cout << "OP_MULT" << endl; }/*{ return OP_MULT; }*/
-"/"				{ cout << "OP_DIV" << endl; }/*{ return OP_DIV; }*/
-[ \t\n]                     { cout << "space" << endl; }
-.                           { cout << "." << endl; }
-%%
+ID			{LETRA}({LETRA}|{DIGITO}|_)*
 
-/*este es el main, lo estuve usando para ir probando directamente en la terminal, despues vuela*/
-int main(int, char**) {
-  // lex through the input:
-  while (yylex());
-}
+
+%%
+"="			{ return ASIG;}
+"+"			{ return OP_SUMA;}
+"-"			{ return OP_RESTA;}
+"*"			{ return OP_MUL;}
+"/"			{ return OP_DIV;}
+"("			{ return P_A;}
+")"			{ return P_C;}
+{ID}			{ return ID;}
+
+{DIGITO}+	      { yylval = atoi( yytext ) ;return ENTERO;}
+
+"\n"      		
+"\t"		
+
+
+
