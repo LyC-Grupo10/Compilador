@@ -1,0 +1,3 @@
+GCI 			Polaca Inversa
+Tema Especial 1		Between
+Tema Especial 2		Factorial Combinatorio 
