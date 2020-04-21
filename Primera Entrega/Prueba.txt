@@ -1,6 +1,28 @@
+DEFVAR
+int: a
+string: var
+ENDDEF
 
-a = (((8 + c) + d) / 3)
+BEGINP
+***/Ahora empieza mi programa!/***
+a = 100;
 
+if(a > 200)
+{
+	var = "Es mayor a 200.";
+}
+else
+{
+	if(a <= 100)
+	{
+		var = "Es menor o igual a 100.";
+	}
+}
 
+write var;
 
+a = 2+3;
+a = 2*1;
+a = (5-3)*2;
 
+ENDP
