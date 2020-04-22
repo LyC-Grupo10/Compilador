@@ -18,7 +18,6 @@
 
 DIGITO      [0-9]
 LETRA       [a-zA-Z]
-NEGATIVO    [-]
 ESPACIO     [" "]
 DOSPUNTOS   [":"]
 COMA        [","]
