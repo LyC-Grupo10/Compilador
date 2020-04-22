@@ -123,7 +123,7 @@ LL_C            ["}"]
 //Main para mandar desde consola (originalmente tiene que leer desde un archivo)
 /*int main(int, char**) {
   // lex through the input:
-  while (yylex());
+  while (yylex());;
 }*/
 
 void validarString(char cadena[])
