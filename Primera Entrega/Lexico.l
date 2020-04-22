@@ -25,7 +25,7 @@ PUNTOYCOMA  [";"]
 CARACTER	[a-z,A-Z,0-9]
 ESPECIALES  ["!","#", "$", "%", "&", "/", "?", "¿", "¡", "°", "|", "^", "~", ",", ";", ":", ".", "@",  "_", "-", "¨", "`", "*"]
 TEXTO		\"({CARACTER}+|{ESPACIO}|{ESPECIALES})*\"
-COMENTARIO  "***/"(({LETRA}|{DIGITO})+|{ESPECIALES}|{ESPACIO})*"/***"
+COMENTARIO  \*\*\*\/(.*?)\/\*\*\*
 
 CONST_REAL      {DIGITO}*"."{DIGITO}*
 CONST_INT       {DIGITO}+
