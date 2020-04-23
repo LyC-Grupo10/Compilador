@@ -1,0 +1,15 @@
+NOMBRE                        TIPODATO                      VALOR                         LONGITUD                      
+a                             INT                           --                            1 
+b                             INT                           --                            1 
+c                             INT                           --                            1 
+var                           STRING                        --                            3 
+cadena                        STRING                        --                            6 
+holis                         STRING                        --                            5 
+promedio                      FLOAT                         --                            8 
+_100                          CONST_INT                     100                           3 
+_200                          CONST_INT                     200                           3 
+_"Es mayor a 200."            CONST_STR                     "Es mayor a 200."             17
+_"Es menor o igual a 100."    CONST_STR                     "Es menor o igual a 100."     25
+_3                            CONST_INT                     3                             1 
+_2                            CONST_INT                     2                             1 
+_1                            CONST_INT                     1                             1 
