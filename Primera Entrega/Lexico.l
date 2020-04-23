@@ -7,6 +7,7 @@
     #include <conio.h>
     #include "y.tab.h"
     void validarString(char[]);
+    void validarInt(int);
     /*using namespace std;
     extern int yylex();*/ /*esto se queda esperando una cadena y la parsea, despues puede volar*/
 %}
@@ -107,6 +108,7 @@ LL_C            ["}"]
                 }
 {CONST_INT}     {
                     yylval.tipo_int = atoi(yytext);
+                    validarInt(yylval.tipo_int);
                     /*validar int, agregar a la tabla*/
                     return CONST_INT;
                 }
@@ -131,6 +133,14 @@ void validarString(char cadena[])
     if(largo > 32)
     {
         yyerror("\nRango de string excedido. Se permite un máximo de 30 caracteres.\n");
+    }
+}
+
+void validarInt(int numero)
+{   
+    if(numero > 65535)
+    {
+        yyerror("\nValor de int excedido, el mayor posible es 65535.\n");
     }
 }
 

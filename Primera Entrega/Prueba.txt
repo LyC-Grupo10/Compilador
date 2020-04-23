@@ -15,7 +15,7 @@ else
 {
 	if(a <= 100)
 	{
-		***/ aca hay un 2º comentario más loco ñ /***
+		***/ aca hay un 2; comentario m!s loco . /***
 		var = "Es menor o igual a 100.";
 	}
 }
