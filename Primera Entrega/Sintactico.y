@@ -57,7 +57,7 @@ declaraciones:
 declaracion:
             INT DOSPUNTOS lista_variables {printf("\nLeyendo la declaracion de un int.\n");}
             | STRING DOSPUNTOS lista_variables {printf("\nLeyendo la declaracion de un string.\n");}
-            | FLOAT DOSPUNTOS lista_variables {printf("\nLeyendo la declaracion de un ifloat.\n");}
+            | FLOAT DOSPUNTOS lista_variables {printf("\nLeyendo la declaracion de un float.\n");}
             ;
 
 lista_variables:

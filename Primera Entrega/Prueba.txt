@@ -1,11 +1,13 @@
 DEFVAR
 int: a
 string: var
+float: b
 ENDDEF
 
 BEGINP
 ***/Ahora empieza mi programa!/***
 a = 100;
+b = 4.12;
 
 if(a > 200)
 {

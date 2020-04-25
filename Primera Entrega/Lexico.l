@@ -7,6 +7,7 @@
     #include <conio.h>
     #include "y.tab.h"
     void validarString(char[]);
+    void validarFloat(double);
     void validarInt(int);
     /*using namespace std;
     extern int yylex();*/ /*esto se queda esperando una cadena y la parsea, despues puede volar*/
@@ -97,19 +98,17 @@ LL_C            ["}"]
 {TEXTO}         {
                     yylval.tipo_str = yytext;
                     validarString(yylval.tipo_str);
-                    /*insertar el valor en la tabla de símbolos*/
                     return CONST_STR;
                 }
 {COMENTARIO}	
 {CONST_REAL}    {
                     yylval.tipo_double = atof(yytext);
-                    /*validar real, agregar a la tabla*/
+                    validarFloat(yylval.tipo_double);
                     return CONST_REAL;
                 }
 {CONST_INT}     {
                     yylval.tipo_int = atoi(yytext);
                     validarInt(yylval.tipo_int);
-                    /*validar int, agregar a la tabla*/
                     return CONST_INT;
                 }
 {ID}            {
@@ -133,6 +132,17 @@ void validarString(char cadena[])
     if(largo > 32)
     {
         yyerror("\nRango de string excedido. Se permite un máximo de 30 caracteres.\n");
+    }
+}
+
+void validarFloat(double numero)
+{   
+    double max = 3.402823 * pow(10, 38);
+    double min = 1.175494 * pow(10, -38);
+
+    if(numero > max || (numero > 0 && numero < min))
+    {
+        yyerror("\nRango de float excedido. Se permite entre [1.175494*10^-38; 3.402823*10^38] o cero.\n");
     }
 }
 
