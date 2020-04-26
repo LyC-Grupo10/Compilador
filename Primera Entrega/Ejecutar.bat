@@ -1,0 +1,1 @@
+Juntito.exe input.txt

@@ -6,9 +6,15 @@
     #include <math.h>
     #include <conio.h>
     #include "y.tab.h"
+    int yycolumn = 1;
+    #define YY_USER_ACTION  yylloc.first_line = yylloc.last_line = yylineno; \
+                            yylloc.first_column = yycolumn; yylloc.last_column = yycolumn + yyleng -1; \
+                            yycolumn += yyleng;
+
     void validarString(char[]);
     void validarFloat(double);
     void validarInt(int);
+    char valor[20];
 %}
 
 /*---- 2. Conjuntos y Regex ----*/
@@ -62,7 +68,11 @@ LL_C            ["}"]
 "float"         { return FLOAT; }
 "string"        { return STRING; }
 "int"           { return INT; }
+"while"         { return WHILE; }
+"if"            { return IF; }
+"else"          { return ELSE; }
 "write"         { return WRITE; }
+"="             { return OP_ASIG; }
 ":"             { return DOSPUNTOS; }
 ";"             { return PUNTOYCOMA; }
 ","             { return COMA; }
@@ -83,56 +93,51 @@ LL_C            ["}"]
 "<="            { return COMP_BLE; }
 "=="            { return COMP_BEQ; }
 "!="            { return COMP_BNE; }
-"="             { return OP_ASIG; }
 "and"           { return OP_AND; }
 "or"            { return OP_OR; }
 "not"           { return OP_NOT; }
 
-"\n"
-"\t"
-"while"         { return WHILE; }
-"if"            { return IF; }
-"else"          { return ELSE; }
 "fact"          { return FACT; }
 "comb"          { return COMB; }
 "between"       { return BETWEEN; }
+
+{COMENTARIO}    {yycolumn = 1;}
+
+{ID}            {
+                    yylval.tipo_str = yytext;
+                    return ID;
+                }	
 {TEXTO}         {
                     yylval.tipo_str = yytext;
                     validarString(yylval.tipo_str);
+                    insertarTS(yylval.tipo_str, "CONST_STR", yylval.tipo_str, 0, 0);
                     return CONST_STR;
                 }
-{COMENTARIO}	
 {CONST_REAL}    {
                     yylval.tipo_double = atof(yytext);
                     validarFloat(yylval.tipo_double);
+                    insertarTS(yytext, "CONST_REAL", "", 0, yylval.tipo_double);
                     return CONST_REAL;
                 }
 {CONST_INT}     {
                     yylval.tipo_int = atoi(yytext);
                     validarInt(yylval.tipo_int);
+                    insertarTS(yytext, "CONST_INT", "", yylval.tipo_int, 0);
                     return CONST_INT;
                 }
-{ID}            {
-                    yylval.tipo_str = yytext;
-                    return ID;
-                }
+                
+\n            { yycolumn = 1; } /*resetear a 1 cada vez que haya una nueva linea*/
+\t
 %%
 
-
 /*---- 4. Código ----*/
-
-//Main para mandar desde consola (originalmente tiene que leer desde un archivo)
-/*int main(int, char**) {
-  // lex through the input:
-  while (yylex());;
-}*/
 
 void validarString(char cadena[])
 {
     int largo = strlen(cadena);
     if(largo > 32)
     {
-        yyerror("\nRango de string excedido. Se permite un máximo de 30 caracteres.\n");
+        yyerror("Error: Rango de string excedido. Se permite un maximo de 30 caracteres", 0, 0, 0);
     }
 }
 
@@ -143,21 +148,30 @@ void validarFloat(double numero)
 
     if(numero > max || (numero > 0 && numero < min))
     {
-        yyerror("\nRango de float excedido. Se permite entre [1.175494*10^-38; 3.402823*10^38] o cero.\n");
+        yyerror("Error: Rango de float excedido. Se permite entre [1.175494*10^-38; 3.402823*10^38] o cero.\n");
     }
 }
 
 void validarInt(int numero)
-{   
+{
     if(numero > 65535)
     {
-        yyerror("\nValor de int excedido, el mayor posible es 65535.\n");
+        yyerror("Error: Valor de int excedido, el mayor posible es 65535", 0, 0, 0);
     }
 }
 
-int yyerror(char *s)
+int yyerror(char *mensaje, int fila, int ci, int cf)
 {
-    printf("\nError: %s\nLinea: %d\n", s, yylineno);
+    if(fila == 0 || ci == 0 || cf == 0) /* || fila <= yylineno)*/
+        printf("\nLinea %d: %s.\n", yylineno, mensaje);
+    else
+        printf("\nLinea %d, %d-%d: %s.\n", fila, ci, cf, mensaje);
+    
     system("Pause");
     exit(1);
 }
+
+
+
+
+
