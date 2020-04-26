@@ -9,6 +9,10 @@ BEGINP
 a = 100;
 b = 4.12;
 
+if(between (a, [a + b * (4 + b); 11.22])) {
+	var = "String del between";
+}
+
 b = fact( "buen dia" );
 c = comb( 1, 16);
 

@@ -89,6 +89,10 @@ asignacion:
             ID OP_ASIG expresion PUNTOYCOMA {$<tipo_str>$ = $1; printf("\n---Se asigno la expresion a <%s> ---\n", $<tipo_str>$);}
             ;
 
+between:
+        BETWEEN PAR_A ID COMA COR_A expresion PUNTOYCOMA expresion COR_C PAR_C {printf("\nBetween OK\n");}
+        ;              
+
 seleccion:
             IF PAR_A condicion PAR_C LL_A sentencia LL_C {printf("IF\n");}
             | IF PAR_A condicion PAR_C LL_A sentencia LL_C ELSE LL_A sentencia LL_C {printf("IF-ELSE\n");}
@@ -103,6 +107,7 @@ condicion:
             | comparacion OP_AND comparacion {printf("AND\n");}
             | comparacion OP_OR comparacion {printf("OR\n");}
             | OP_NOT comparacion {printf("NOT\n");}
+            | between
             ;
 
 comparacion:
