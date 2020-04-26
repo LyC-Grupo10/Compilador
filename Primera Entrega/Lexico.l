@@ -25,7 +25,7 @@ DOSPUNTOS   [":"]
 COMA        [","]
 PUNTOYCOMA  [";"]
 CARACTER	[a-z,A-Z,0-9]
-ESPECIALES  ["!","#", "$", "%", "&", "/", "?", "¿", "¡", "°", "|", "^", "~", ",", ";", ":", ".", "@",  "_", "-", "¨", "`", "*"]
+ESPECIALES  ["!","#", "$", "%", "&", "/", "?", "¿", "¡", "°", "|", "^", "~", ",", ";", ":", ".", "@",  "_", "-", "¨", "`", "*","º"]
 TEXTO		\"({CARACTER}+|{ESPACIO}|{ESPECIALES})*\"
 COMENTARIO  \*\*\*\/(.*?)\/\*\*\*
 
@@ -95,6 +95,9 @@ LL_C            ["}"]
 "while"         { return WHILE; }
 "if"            { return IF; }
 "else"          { return ELSE; }
+"fact"          { return FACT; }
+"comb"          { return COMB; }
+"between"       { return BETWEEN; }
 {TEXTO}         {
                     yylval.tipo_str = yytext;
                     validarString(yylval.tipo_str);

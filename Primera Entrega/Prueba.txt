@@ -9,6 +9,9 @@ BEGINP
 a = 100;
 b = 4.12;
 
+b = fact( "buen dia" );
+c = comb( 1, 16);
+
 if(a > 200)
 {
 	var = "Es mayor a 200.";
@@ -22,8 +25,12 @@ else
 	}
 }
 
-write var;
-
+while( a>b ){
+	while( a>b ){
+	***/ comentarrioooo /***
+		var = "caca while";
+	}
+}
 a = 2+3;
 a = 2*1;
 a = (5-3)*2;

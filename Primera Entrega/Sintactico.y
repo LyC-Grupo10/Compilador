@@ -22,7 +22,7 @@ char *tipo_str;
 %start PROGRAMA
 %token DEFVAR ENDDEF BEGINP ENDP
 %token INT FLOAT STRING
-%token IF ELSE WHILE
+%token IF ELSE WHILE FACT COMB BETWEEN
 %token PUNTOYCOMA COMA DOSPUNTOS
 %token OP_ASIG OP_SUMA OP_RESTA OP_MULT OP_DIV
 %token PAR_A PAR_C COR_A COR_C LL_A LL_C
@@ -132,6 +132,16 @@ factor:
         | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %f\n", $<tipo_double>$);}
         | CONST_STR { $<tipo_str>$ = $1; printf("String: %s\n", $<tipo_str>$);}
         | PAR_A expresion PAR_C
+        | combinatorio
+        | factorial
+        ;
+
+combinatorio:
+        COMB PAR_A expresion COMA expresion PAR_C {printf("combinatorio OK\n");}
+        ;
+
+factorial:
+        FACT PAR_A expresion PAR_C {printf("Factorial OK\n");}
         ;
 %%
 
