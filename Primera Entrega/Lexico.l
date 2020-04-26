@@ -9,8 +9,6 @@
     void validarString(char[]);
     void validarFloat(double);
     void validarInt(int);
-    /*using namespace std;
-    extern int yylex();*/ /*esto se queda esperando una cadena y la parsea, despues puede volar*/
 %}
 
 /*---- 2. Conjuntos y Regex ----*/
