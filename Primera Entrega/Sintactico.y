@@ -36,8 +36,8 @@ typedef struct
 }t_tabla;
 
 void crearTablaTS();
-int insertarTS(char*, char*, char*, int, double);
-t_data* crearDatos(char*, char*, char*, int, double);
+int insertarTS(const char*, const char*, const char*, int, double);
+t_data* crearDatos(const char*, const char*, const char*, int, double);
 void guardarTS();
 t_tabla tablaTS;
 
@@ -47,7 +47,8 @@ char vecAux[20];
 char* punt;
 
 /* --- Validaciones --- */
-int existeID(char*);
+int existeID(const char*);
+int esNumero(const char*,char*);
 char mensajes[100];
 
 %}
@@ -124,51 +125,52 @@ declaraciones:
             ;
 
 declaracion:
-             INT DOSPUNTOS lista_variables {
+             INT DOSPUNTOS lista_variables  {
                                                 for(i=0;i<cantid;i++) /*vamos agregando todos los ids que leyo*/
                                                 {
-                                                        if(insertarTS(idvec[i], "INT", "", 0, 0) != 0) //no lo guarda porque ya existe
-                                                        {
-                                                                sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
-                                                                yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
-                                                        }
+                                                    if(insertarTS(idvec[i], "INT", "", 0, 0) != 0) //no lo guarda porque ya existe
+                                                    {
+                                                        sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
+                                                        yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
+                                                    }
                                                 }
                                                 cantid=0;
-                                          } 
-            | STRING DOSPUNTOS lista_variables {
-                                                for(i=0;i<cantid;i++)
-                                                {
+                                            } 
+            | STRING DOSPUNTOS lista_variables  {
+                                                    for(i=0;i<cantid;i++)
+                                                    {
                                                         if(insertarTS(idvec[i], "STRING", "", 0, 0) != 0)
                                                         {
-                                                                sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
-                                                                yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
+                                                            sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
+                                                            yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
                                                         }
-                                                } cantid=0;}
-            | FLOAT DOSPUNTOS lista_variables {
-                                                for(i=0;i<cantid;i++)
-                                                {
+                                                    } cantid=0;
+                                                }
+            | FLOAT DOSPUNTOS lista_variables   {
+                                                    for(i=0;i<cantid;i++)
+                                                    {
                                                         if(insertarTS(idvec[i], "FLOAT", "", 0, 0) != 0)
                                                         {
-                                                                sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
-                                                                yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
+                                                            sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
+                                                            yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
                                                         }
-                                                } cantid=0;}
+                                                    } cantid=0;
+                                                }
             ;
 
 lista_variables:
-                ID {
-                    strcpy(vecAux, yylval.tipo_str); /*tomamos el nombre de la variable*/
-                    punt = strtok(vecAux, " ;\n"); /*eliminamos extras*/
-                    strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
-                    cantid++;
+                ID  {
+                        strcpy(vecAux, yylval.tipo_str); /*tomamos el nombre de la variable*/
+                        punt = strtok(vecAux, " ;\n"); /*eliminamos extras*/
+                        strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
+                        cantid++;
                     }
-                | ID
-                        {
+                |ID {
                         strcpy(vecAux, yylval.tipo_str); /*se repite aca tambien, no lo toma de arriba*/
                         punt = strtok(vecAux, " ;\n");
                         strcpy(idvec[cantid], punt);
                         cantid++;
-                        } 
+                    } 
                 PUNTOYCOMA lista_variables
                 ;
 
@@ -190,18 +192,18 @@ sentencia:
 
 salida:
         WRITE factor PUNTOYCOMA {printf("WRITE>>>\n");}
-       ;
+        ;
 
 asignacion:
             ID OP_ASIG expresion PUNTOYCOMA {
                                                 strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
                                                 punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
-                                                if(existeID(punt) != 0) /*No existe: entonces no esta declarada*/
+                                                if(!existeID(punt)) /*No existe: entonces no esta declarada*/
                                                 {
-                                                        sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
-                                                        yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                                                    sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
+                                                    yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                                                 }
-                                        }
+                                            }
             ;
 
 seleccion:
@@ -210,7 +212,7 @@ seleccion:
             ;
 
 iteracion: 
-            WHILE PAR_A condicion PAR_C LL_A sentencia LL_C {printf("WHILE\n");}
+            WHILE PAR_A condicion PAR_C LL_A bloque LL_C {printf("WHILE\n");}
             ;
 
 condicion:
@@ -246,10 +248,10 @@ factor:/*verificando aca en este ID si existe o no, se cubre en todas las aparic
         ID {
                 strcpy(vecAux, $1);
                 punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado*/
-                if(existeID(punt) != 0) /*No existe: entonces no esta declarada --> error*/
+                if(!existeID(punt)) /*No existe: entonces no esta declarada --> error*/
                 {
-                        sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
-                        yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                    sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
+                    yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                 }
            }
         | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$);}
@@ -260,16 +262,46 @@ factor:/*verificando aca en este ID si existe o no, se cubre en todas las aparic
         | factorial
         ;
 
+expresionNumerica:
+            expresionNumerica OP_SUMA terminoNumerico {printf("Suma OK\n");}
+            | expresionNumerica OP_RESTA terminoNumerico {printf("Resta OK\n");}
+            | terminoNumerico
+            ;
+
+terminoNumerico:
+        terminoNumerico OP_MULT factorNumerico {printf("Multiplicacion OK\n");}
+        | terminoNumerico OP_DIV factorNumerico {printf("Division OK\n");}
+        | factorNumerico
+        ;
+
+factorNumerico:
+        ID {
+                char error[50];
+                strcpy(vecAux, $1);
+                punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado*/
+                if(!esNumero(punt,error)) /*No existe: entonces no esta declarada --> error*/
+                {
+                    sprintf(mensajes, "%s", error);
+                    yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                }
+           }
+        | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$);}
+        | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %f\n", $<tipo_double>$);}
+        | PAR_A expresionNumerica PAR_C
+        | combinatorio
+        | factorial
+        ;
+
 combinatorio:
-        COMB PAR_A expresion COMA expresion PAR_C {printf("Combinatorio OK\n");}
+        COMB PAR_A expresionNumerica COMA expresionNumerica PAR_C {printf("Combinatorio OK\n");}
         ;
 
 factorial:
-        FACT PAR_A expresion PAR_C {printf("Factorial OK\n");}
+        FACT PAR_A expresionNumerica PAR_C {printf("Factorial OK\n");}
         ;
 
 between:
-        BETWEEN PAR_A ID COMA COR_A expresion PUNTOYCOMA expresion COR_C PAR_C {printf("Between OK\n");}
+        BETWEEN PAR_A ID COMA COR_A expresionNumerica PUNTOYCOMA expresionNumerica COR_C PAR_C {printf("Between OK\n");}
         ; 
 %%
 
@@ -293,176 +325,213 @@ int main(int argc, char *argv[])
     }
 }
 
-int insertarTS(char *nombre, char *tipo, char* valString, int valInt, double valDouble)
+int insertarTS(const char *nombre,const char *tipo, const char* valString, int valInt, double valDouble)
 {
-        t_simbolo *tabla = tablaTS.primero;
-        char nombreCTE[32] = "_";
-        strcat(nombreCTE, nombre);
+    t_simbolo *tabla = tablaTS.primero;
+    char nombreCTE[32] = "_";
+    strcat(nombreCTE, nombre);
+    
+    while(tabla)
+    {
+        if(strcmp(tabla->data.nombre, nombre) == 0 || strcmp(tabla->data.nombre, nombreCTE) == 0)
+        {
+            return 1;
+        }
         
-        while(tabla)
+        if(tabla->next == NULL)
         {
-                if(strcmp(tabla->data.nombre, nombre) == 0 || strcmp(tabla->data.nombre, nombreCTE) == 0)
-                {
-                        return 1;
-                }
-                
-                if(tabla->next == NULL)
-                        break;
-                tabla = tabla->next;
+            break;
         }
+        tabla = tabla->next;
+    }
 
-        t_data *data = (t_data*)malloc(sizeof(t_data));
-        data = crearDatos(nombre, tipo, valString, valInt, valDouble);
-        if(data == NULL)
-                return 1;
+    t_data *data = (t_data*)malloc(sizeof(t_data));
+    data = crearDatos(nombre, tipo, valString, valInt, valDouble);
 
-        t_simbolo* nuevo = (t_simbolo*)malloc(sizeof(t_simbolo));
-        if(nuevo == NULL)
-                return 2;
+    if(data == NULL)
+    {
+        return 1;
+    }
 
-        nuevo->data = *data;
-        nuevo->next = NULL;
-        if(tablaTS.primero == NULL)
-        {
-                tablaTS.primero = nuevo;
-         }
-        else
-        {
-                tabla->next = nuevo;
-        }
-        return 0;
+    t_simbolo* nuevo = (t_simbolo*)malloc(sizeof(t_simbolo));
+
+    if(nuevo == NULL)
+    {
+        return 2;
+    }
+
+    nuevo->data = *data;
+    nuevo->next = NULL;
+
+    if(tablaTS.primero == NULL)
+    {
+        tablaTS.primero = nuevo;
+    }
+    else
+    {
+        tabla->next = nuevo;
+    }
+
+    return 0;
 }
 
 
-t_data* crearDatos(char *nombre, char *tipo, char* valString, int valInt, double valDouble)
+t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble)
 {
-        char full[32] = "_";
-        char aux[20];
+    char full[32] = "_";
+    char aux[20];
 
-        t_data *data = (t_data*)calloc(1, sizeof(t_data));
-        if(data == NULL)
-        {
-                return NULL;
-        }
-
-        data->tipo = (char*)malloc(sizeof(char) * (strlen(tipo) + 1));
-        strcpy(data->tipo, tipo);
-
-        //Es una variable
-        if(strcmp(tipo, "STRING")==0 || strcmp(tipo, "INT")==0 || strcmp(tipo, "FLOAT")==0)
-        {
-                //al nombre lo dejo aca porque no lleva _
-                data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
-                strcpy(data->nombre, nombre);
-                return data;
-        }
-        else
-        {      //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
-                if(strcmp(tipo, "CONST_STR") == 0)
-                {
-                        data->valor.valor_str = (char*)malloc(sizeof(char) * strlen(valString) +1);
-                        data->nombre = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
-                        strcat(full, valString);
-                        strcpy(data->nombre, full);    
-                        strcpy(data->valor.valor_str, valString);
-                }
-                if(strcmp(tipo, "CONST_REAL") == 0)
-                {
-                        sprintf(aux, "%g", valDouble);
-                        strcat(full, aux);
-                        data->nombre = (char*)malloc(sizeof(char) * strlen(full));
-
-                        strcpy(data->nombre, full);
-                        data->valor.valor_double = valDouble;
-                }
-                if(strcmp(tipo, "CONST_INT") == 0)
-                {
-                        sprintf(aux, "%d", valInt);
-                        strcat(full, aux);
-                        data->nombre = (char*)malloc(sizeof(char) * strlen(full));
-                        strcpy(data->nombre, full);
-                        data->valor.valor_int = valInt;
-                }
-                return data;
-        }
+    t_data *data = (t_data*)calloc(1, sizeof(t_data));
+    if(data == NULL)
+    {
         return NULL;
+    }
+
+    data->tipo = (char*)malloc(sizeof(char) * (strlen(tipo) + 1));
+    strcpy(data->tipo, tipo);
+
+    //Es una variable
+    if(strcmp(tipo, "STRING")==0 || strcmp(tipo, "INT")==0 || strcmp(tipo, "FLOAT")==0)
+    {
+        //al nombre lo dejo aca porque no lleva _
+        data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+        strcpy(data->nombre, nombre);
+        return data;
+    }
+    else
+    {      //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
+        if(strcmp(tipo, "CONST_STR") == 0)
+        {
+            data->valor.valor_str = (char*)malloc(sizeof(char) * strlen(valString) +1);
+            data->nombre = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
+            strcat(full, valString);
+            strcpy(data->nombre, full);    
+            strcpy(data->valor.valor_str, valString);
+        }
+        if(strcmp(tipo, "CONST_REAL") == 0)
+        {
+            sprintf(aux, "%g", valDouble);
+            strcat(full, aux);
+            data->nombre = (char*)malloc(sizeof(char) * strlen(full));
+
+            strcpy(data->nombre, full);
+            data->valor.valor_double = valDouble;
+        }
+        if(strcmp(tipo, "CONST_INT") == 0)
+        {
+            sprintf(aux, "%d", valInt);
+            strcat(full, aux);
+            data->nombre = (char*)malloc(sizeof(char) * strlen(full));
+            strcpy(data->nombre, full);
+            data->valor.valor_int = valInt;
+        }
+        return data;
+    }
+    return NULL;
 }
 
 void guardarTS()
 {
-        FILE* arch;
-        if((arch = fopen("ts.txt", "wt")) == NULL)
-        {
-                printf("\nNo se pudo crear la tabla de simbolos.\n\n");
-                return;
-        }
-        else if(tablaTS.primero == NULL)
-                return;
+    FILE* arch;
+    if((arch = fopen("ts.txt", "wt")) == NULL)
+    {
+            printf("\nNo se pudo crear la tabla de simbolos.\n\n");
+            return;
+    }
+    else if(tablaTS.primero == NULL)
+            return;
+    
+    fprintf(arch, "%-30s%-30s%-30s%-30s\n", "NOMBRE", "TIPODATO", "VALOR", "LONGITUD");
+
+    t_simbolo *aux;
+    t_simbolo *tabla = tablaTS.primero;
+    char linea[100];
+
+    while(tabla)
+    {
+        aux = tabla;
+        tabla = tabla->next;
         
-        fprintf(arch, "%-30s%-30s%-30s%-30s\n", "NOMBRE", "TIPODATO", "VALOR", "LONGITUD");
-
-        t_simbolo *aux;
-        t_simbolo *tabla = tablaTS.primero;
-        char linea[100];
-
-        while(tabla)
+        if(strcmp(aux->data.tipo, "INT") == 0) //variable int
         {
-                aux = tabla;
-                tabla = tabla->next;
-                
-                if(strcmp(aux->data.tipo, "INT") == 0) //variable int
-                {
-                        sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
-                }
-                else if(strcmp(aux->data.tipo, "CONST_INT") == 0)
-                {
-                        sprintf(linea, "%-30s%-30s%-30d%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre) -1);
-                }
-                else if(strcmp(aux->data.tipo, "FLOAT") ==0)
-                {
-                        sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
-                }
-                else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
-                {
-                        sprintf(linea, "%-30s%-30s%-30g%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre) -1);
-                }
-                else if(strcmp(aux->data.tipo, "STRING") == 0)
-                {
-                        sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
-                }
-                else if(strcmp(aux->data.tipo, "CONST_STR") == 0)
-                {
-                        sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.nombre) -1);
-                }
-                fprintf(arch, "%s", linea);
-                free(aux);
+            sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
         }
-        fclose(arch); 
+        else if(strcmp(aux->data.tipo, "CONST_INT") == 0)
+        {
+            sprintf(linea, "%-30s%-30s%-30d%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre) -1);
+        }
+        else if(strcmp(aux->data.tipo, "FLOAT") ==0)
+        {
+            sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
+        }
+        else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
+        {
+            sprintf(linea, "%-30s%-30s%-30g%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre) -1);
+        }
+        else if(strcmp(aux->data.tipo, "STRING") == 0)
+        {
+            sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
+        }
+        else if(strcmp(aux->data.tipo, "CONST_STR") == 0)
+        {
+            sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.nombre) -1);
+        }
+        fprintf(arch, "%s", linea);
+        free(aux);
+    }
+    fclose(arch); 
 }
 
 void crearTablaTS()
 {
-        tablaTS.primero = NULL;
+    tablaTS.primero = NULL;
 }
 
-int existeID(char* id) //y hasta diria que es igual para existeCTE
+int existeID(const char* id) //y hasta diria que es igual para existeCTE
 {
-        //tengo que ver el tema del _ en el nombre de las cte
-        t_simbolo *tabla = tablaTS.primero;
-        char nombreCTE[32] = "_";
-        strcat(nombreCTE, id);
-        int b1 = 0;
-        int b2 = 0;
+    //tengo que ver el tema del _ en el nombre de las cte
+    t_simbolo *tabla = tablaTS.primero;
+    char nombreCTE[32] = "_";
+    strcat(nombreCTE, id);
+    int b1 = 0;
+    int b2 = 0;
 
-        while(tabla)
+    while(tabla)
+    {
+        b1 = strcmp(tabla->data.nombre, id);
+        b2 = strcmp(tabla->data.nombre, nombreCTE);
+        if(b1 == 0 || b2 == 0)
         {
-                b1 = strcmp(tabla->data.nombre, id);
-                b2 = strcmp(tabla->data.nombre, nombreCTE);
-                if(b1 == 0 || b2 == 0)
-                {
-                        return 0;
-                }
-                tabla = tabla->next;
+                return 1;
         }
-        return 1;
+        tabla = tabla->next;
+    }
+    return 0;
+}
+
+int esNumero(const char* id,char* error)
+{
+    t_simbolo *tabla = tablaTS.primero;
+    char nombreCTE[32] = "_";
+    strcat(nombreCTE, id);
+
+    while(tabla)
+    {
+        if(strcmp(tabla->data.nombre, id) == 0 || strcmp(tabla->data.nombre, nombreCTE) == 0)
+        {
+            if(strcmp(tabla->data.tipo, "INT")==0 || strcmp(tabla->data.tipo, "FLOAT")==0)
+            {
+                return 1;
+            }
+            else
+            {
+                strcpy(error,"Tipo de dato incorrecto");
+                sprintf(error,"%s%s%s","Error: tipo de dato de la variable '",id,"' incorrecto. Tipos permitidos: int y float");
+                return 0;
+            }
+        }
+        tabla = tabla->next;
+    }
+    sprintf(error, "%s%s%s", "Error: no se declaro la variable '", id, "'");
+    return 0;
 }

@@ -1,1 +1,1 @@
-PrimeraEntrega.exe input.txt
+Primera.exe prueba.txt
