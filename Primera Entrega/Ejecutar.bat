@@ -1,1 +1,1 @@
-Juntito.exe input.txt
+PrimeraEntrega.exe input.txt

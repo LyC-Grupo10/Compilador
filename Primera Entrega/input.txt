@@ -1,6 +1,6 @@
 DEFVAR
 int: a; c
-string: var;cadena;holis
+string: var; cadena 
 float: promedio; b
 ***/string:cadena/***
 ENDDEF
@@ -14,7 +14,7 @@ if(between (a, [a + b * (4 + b); 11.22])) {
 	var = "String del between";
 }
 
-b = fact( "buen dia" );
+b = fact(10);
 c = comb( 1, 16);
 
 if(a > 200)

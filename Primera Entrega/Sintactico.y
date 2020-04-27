@@ -253,7 +253,7 @@ factor:/*verificando aca en este ID si existe o no, se cubre en todas las aparic
                 }
            }
         | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$);}
-        | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %f\n", $<tipo_double>$);}
+        | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %g\n", $<tipo_double>$);}
         | CONST_STR { $<tipo_str>$ = $1; printf("String: %s\n", $<tipo_str>$);}
         | PAR_A expresion PAR_C
         | combinatorio
@@ -261,7 +261,7 @@ factor:/*verificando aca en este ID si existe o no, se cubre en todas las aparic
         ;
 
 combinatorio:
-        COMB PAR_A expresion COMA expresion PAR_C {printf("combinatorio OK\n");}
+        COMB PAR_A expresion COMA expresion PAR_C {printf("Combinatorio OK\n");}
         ;
 
 factorial:
@@ -368,7 +368,7 @@ t_data* crearDatos(char *nombre, char *tipo, char* valString, int valInt, double
                 }
                 if(strcmp(tipo, "CONST_REAL") == 0)
                 {
-                        sprintf(aux, "%.5f", valDouble);
+                        sprintf(aux, "%g", valDouble);
                         strcat(full, aux);
                         data->nombre = (char*)malloc(sizeof(char) * strlen(full));
 
@@ -424,7 +424,7 @@ void guardarTS()
                 }
                 else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
                 {
-                        sprintf(linea, "%-30s%-30s%-30.5f%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre) -1);
+                        sprintf(linea, "%-30s%-30s%-30g%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre) -1);
                 }
                 else if(strcmp(aux->data.tipo, "STRING") == 0)
                 {
