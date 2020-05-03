@@ -1,0 +1,1 @@
+Primera.exe prueba.txt
