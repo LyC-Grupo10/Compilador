@@ -95,7 +95,8 @@ char *tipo_str;
 %token OP_AND "and" 
 %token OP_OR "or"
 %token OP_NOT "not"
-%token WRITE "write"
+%token DISPLAY "display"
+%token GET "get"
 %token <tipo_str>ID "identificador"
 %token <tipo_int>CONST_INT "constante entera"
 %token <tipo_double>CONST_REAL "constante real"
@@ -188,11 +189,34 @@ sentencia:
             | seleccion
             | iteracion
             | salida
+            | entrada
             ;
 
 salida:
-        WRITE factor PUNTOYCOMA {printf("WRITE>>>\n");}
+        DISPLAY CONST_STR PUNTOYCOMA {printf("Display OK\n");}
+        | DISPLAY ID PUNTOYCOMA {
+                                    char error[50];
+                                    strcpy(vecAux, $2);
+                                    punt = strtok(vecAux," ;\n");
+                                    if(!esNumero(punt, error)) {
+                                        sprintf(mensajes, "%s", error);
+                                        yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                                    }
+                                    printf("Display OK\n");
+                                }
         ;
+
+entrada:
+        GET ID PUNTOYCOMA { 
+                            strcpy(vecAux, $2);
+                            punt = strtok(vecAux," ;\n");
+                            if(!existeID(punt)) {
+                                sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
+                                yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                            }
+                            printf("Get OK\n");
+                        }
+        ;        
 
 asignacion:
             ID OP_ASIG expresion PUNTOYCOMA {
@@ -222,7 +246,7 @@ condicion:
             | OP_NOT comparacion {printf("NOT\n");}
             | PAR_A comparacion PAR_C OP_AND PAR_A comparacion PAR_C {printf("AND\n");}
             | PAR_A comparacion PAR_C OP_OR PAR_A comparacion PAR_C {printf("OR\n");}
-            | OP_NOT PAR_A comparacion PAR_C{printf("NOT\n");}                        
+            | OP_NOT PAR_A comparacion PAR_C{printf("NOT\n");}
             | between
             ;
 
@@ -500,7 +524,7 @@ int existeID(const char* id) //y hasta diria que es igual para existeCTE
     int b2 = 0;
 
     while(tabla)
-    {
+    {   
         b1 = strcmp(tabla->data.nombre, id);
         b2 = strcmp(tabla->data.nombre, nombreCTE);
         if(b1 == 0 || b2 == 0)

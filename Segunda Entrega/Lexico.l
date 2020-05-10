@@ -71,7 +71,8 @@ LL_C            ["}"]
 "while"         { return WHILE; }
 "if"            { return IF; }
 "else"          { return ELSE; }
-"write"         { return WRITE; }
+"display"       { return DISPLAY; }
+"get"           { return GET; }
 "="             { return OP_ASIG; }
 ":"             { return DOSPUNTOS; }
 ";"             { return PUNTOYCOMA; }
@@ -148,7 +149,7 @@ void validarFloat(double numero)
 
     if(numero > max || (numero > 0 && numero < min))
     {
-        yyerror("Error: Rango de float excedido. Se permite entre [1.175494*10^-38; 3.402823*10^38] o cero.\n");
+        yyerror("Error: Rango de float excedido. Se permite entre [1.175494*10^-38; 3.402823*10^38] o cero.\n", 0, 0, 0);
     }
 }
 
