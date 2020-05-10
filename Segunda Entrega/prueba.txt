@@ -35,12 +35,12 @@ while(i<2)
 {	
 	while(i<2)
 	{
-		write i;
+		display i;
 		i = i + 1;
 	}
 }
 
-write var;
+get c;
 promedio = (a+b+c)/3; ***/probando comentario/***
 a = 2+3;
 a = 2*1;
