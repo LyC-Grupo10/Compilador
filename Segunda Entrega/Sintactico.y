@@ -220,6 +220,9 @@ condicion:
             | comparacion OP_AND comparacion {printf("AND\n");}
             | comparacion OP_OR comparacion {printf("OR\n");}
             | OP_NOT comparacion {printf("NOT\n");}
+            | PAR_A comparacion PAR_C OP_AND PAR_A comparacion PAR_C {printf("AND\n");}
+            | PAR_A comparacion PAR_C OP_OR PAR_A comparacion PAR_C {printf("OR\n");}
+            | OP_NOT PAR_A comparacion PAR_C{printf("NOT\n");}                        
             | between
             ;
 
