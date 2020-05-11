@@ -51,6 +51,20 @@ int existeID(const char*);
 int esNumero(const char*,char*);
 char mensajes[100];
 
+/* ---  Polaca   --- */
+char vecPolaca[500][50];
+int pilaPolaca[50];
+int posActual=0,topePila=-1;
+
+char* insertarPolaca(char *);
+void insertarPolacaInt(int);
+void insertarPolacaDouble(double);
+void avanzarPolaca();
+void grabarPolaca();
+void guardarPos();
+int pedirPos();
+void imprimirPolaca();
+
 %}
 
 %union {
@@ -561,4 +575,44 @@ int esNumero(const char* id,char* error)
     }
     sprintf(error, "%s%s%s", "Error: no se declaro la variable '", id, "'");
     return 0;
+}
+
+/**     Funciones Polaca    **/
+char* insertarPolaca(char * cad){
+	strcpy(vecPolaca[posActual],cad);
+	posActual++;
+	return cad;
+}
+void insertarPolacaInt(int entero){
+	char cad[20];
+	itoa(entero, cad, 10);
+	insertarPolaca(cad);
+}
+void insertarPolacaDouble(double real){
+	char cad[20];
+	sprintf(cad,"%.10f", real);
+	insertarPolaca(cad);
+}
+void avanzarPolaca(){
+	posActual++;
+}
+void imprimirPolaca(){
+	int i;
+	for (i=0;i<posActual;i++){
+	    printf("posActual: %d, valor: %s \r\n",i,vecPolaca[i]);
+    }
+}
+void guardarPos(){
+	tope++; // tope=-1 significa pila vac�a, el primer elemento de la pila esta en tope=0
+	pilaPolaca[tope]=posActual;
+	posActual++;
+}
+int pedirPos(){
+	if(tope>-1){
+	    int retorno = pilaPolaca[tope];
+	    tope--;
+	    return retorno;
+	}else{
+	    return -1;
+	}
 }
