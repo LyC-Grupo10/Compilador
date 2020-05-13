@@ -127,7 +127,7 @@ char *tipo_str;
 
 PROGRAMA:
         bloque_declaraciones algoritmo
-        { guardarTS(); printf("\nCompilacion OK.\n");}
+        { guardarTS(); printf("\nCompilacion OK.\n"); grabarPolaca();}
         ;
 
 bloque_declaraciones:
@@ -274,14 +274,14 @@ comparacion:
             ;
 
 expresion:
-            expresion OP_SUMA termino {printf("Suma OK\n");}
-            | expresion OP_RESTA termino {printf("Resta OK\n");}
+            expresion OP_SUMA termino {printf("Suma OK\n");insertarPolaca("+");}
+            | expresion OP_RESTA termino {printf("Resta OK\n"); insertarPolaca("-");}
             | termino
             ;
 
 termino:
-        termino OP_MULT factor {printf("Multiplicacion OK\n");}
-        | termino OP_DIV factor {printf("Division OK\n");}
+        termino OP_MULT factor {printf("Multiplicacion OK\n"); insertarPolaca("*");}
+        | termino OP_DIV factor {printf("Division OK\n"); insertarPolaca("/");}
         | factor
         ;
 
@@ -294,10 +294,11 @@ factor:/*verificando aca en este ID si existe o no, se cubre en todas las aparic
                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                 }
+
            }
-        | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$);}
-        | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %g\n", $<tipo_double>$);}
-        | CONST_STR { $<tipo_str>$ = $1; printf("String: %s\n", $<tipo_str>$);}
+        | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$); insertarPolacaInt($<tipo_int>$);}
+        | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %g\n", $<tipo_double>$); insertarPolacaDouble($<tipo_double>$);}
+        | CONST_STR { $<tipo_str>$ = $1; printf("String: %s\n", $<tipo_str>$); insertarPolaca($<tipo_str>$);}
         | PAR_A expresion PAR_C
         | combinatorio
         | factorial
@@ -543,6 +544,7 @@ int existeID(const char* id) //y hasta diria que es igual para existeCTE
         b2 = strcmp(tabla->data.nombre, nombreCTE);
         if(b1 == 0 || b2 == 0)
         {
+            insertarPolaca(nombreCTE);
                 return 1;
         }
         tabla = tabla->next;
@@ -603,16 +605,24 @@ void imprimirPolaca(){
     }
 }
 void guardarPos(){
-	tope++; // tope=-1 significa pila vac�a, el primer elemento de la pila esta en tope=0
-	pilaPolaca[tope]=posActual;
+	topePila++; // tope=-1 significa pila vac�a, el primer elemento de la pila esta en tope=0
+	pilaPolaca[topePila]=posActual;
 	posActual++;
 }
 int pedirPos(){
-	if(tope>-1){
-	    int retorno = pilaPolaca[tope];
-	    tope--;
+	if(topePila>-1){
+	    int retorno = pilaPolaca[topePila];
+	    topePila--;
 	    return retorno;
 	}else{
 	    return -1;
 	}
+}
+void grabarPolaca(){
+  FILE* pf = fopen("intermedia.txt","wt");
+  int i;
+	for (i=0;i<posActual;i++){
+	fprintf(pf,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
+	}
+
 }

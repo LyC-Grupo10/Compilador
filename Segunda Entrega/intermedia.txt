@@ -1,2 +1,43 @@
-no se que va aca adentro jeje
-dejo al archivo de placeholder
+pos: 0, valor: 100 
+pos: 1, valor: _a 
+pos: 2, valor: 77.7000000000 
+pos: 3, valor: _b 
+pos: 4, valor: "String del between" 
+pos: 5, valor: _var 
+pos: 6, valor: _b 
+pos: 7, valor: _c 
+pos: 8, valor: _a 
+pos: 9, valor: 200 
+pos: 10, valor: "Es mayor a 200." 
+pos: 11, valor: _var 
+pos: 12, valor: _a 
+pos: 13, valor: 100 
+pos: 14, valor: "Es menor o igual a 100." 
+pos: 15, valor: _var 
+pos: 16, valor: 0 
+pos: 17, valor: _i 
+pos: 18, valor: _i 
+pos: 19, valor: 2 
+pos: 20, valor: _i 
+pos: 21, valor: 2 
+pos: 22, valor: _i 
+pos: 23, valor: 1 
+pos: 24, valor: + 
+pos: 25, valor: _i 
+pos: 26, valor: _c 
+pos: 27, valor: _a 
+pos: 28, valor: _b 
+pos: 29, valor: + 
+pos: 30, valor: _c 
+pos: 31, valor: + 
+pos: 32, valor: 3 
+pos: 33, valor: / 
+pos: 34, valor: _promedio 
+pos: 35, valor: 2 
+pos: 36, valor: 3 
+pos: 37, valor: + 
+pos: 38, valor: _a 
+pos: 39, valor: 2 
+pos: 40, valor: 1 
+pos: 41, valor: * 
+pos: 42, valor: _a 
