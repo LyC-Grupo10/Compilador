@@ -2,21 +2,4 @@ NOMBRE                        TIPODATO                      VALOR               
 a                             INT                           --                            1
 c                             INT                           --                            1
 i                             INT                           --                            1
-var                           STRING                        --                            3
-cadena                        STRING                        --                            6
-promedio                      FLOAT                         --                            8
-b                             FLOAT                         --                            1
-_100                          CONST_INT                     100                           3
-_77.7                         CONST_REAL                    77.7                          4
-_4                            CONST_INT                     4                             1
-_11.22                        CONST_REAL                    11.22                         5
-_"String del between"         CONST_STR                     "String del between"          20
-_1                            CONST_INT                     1                             1
-_14                           CONST_INT                     14                            2
-_2                            CONST_INT                     2                             1
-_3                            CONST_INT                     3                             1
 _5                            CONST_INT                     5                             1
-_200                          CONST_INT                     200                           3
-_"Es mayor a 200."            CONST_STR                     "Es mayor a 200."             17
-_"Es menor o igual a 100."    CONST_STR                     "Es menor o igual a 100."     25
-_0                            CONST_INT                     0                             1

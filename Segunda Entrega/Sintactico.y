@@ -64,7 +64,7 @@ void grabarPolaca();
 void guardarPos();
 int pedirPos();
 void imprimirPolaca();
-
+void escribirPosicionEnTodaLaPila(int);
 %}
 
 %union {
@@ -245,8 +245,8 @@ asignacion:
             ;
 
 seleccion:
-            IF PAR_A condicion PAR_C LL_A sentencia LL_C {printf("IF\n");}
-            | IF PAR_A condicion PAR_C LL_A sentencia LL_C ELSE LL_A sentencia LL_C {printf("IF-ELSE\n");}
+            IF PAR_A condicion PAR_C LL_A sentencia LL_C {printf("IF\n"); escribirPosicionEnTodaLaPila(posActual);}
+            | IF PAR_A condicion PAR_C LL_A sentencia LL_C ELSE LL_A {escribirPosicionEnTodaLaPila(posActual);} sentencia LL_C {printf("IF-ELSE\n"); }
             ;
 
 iteracion: 
@@ -265,12 +265,12 @@ condicion:
             ;
 
 comparacion:
-            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n");}
-            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n");}
-            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n");}
-            | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n");}
-            | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n");}
-            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n");}
+            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n");  insertarPolaca("CMP"); insertarPolaca("BEQ"); guardarPos();}
+            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();}
+            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BGE"); guardarPos();}
+            | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos();}
+            | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos();}
+            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BNE"); guardarPos();}
             ;
 
 expresion:
@@ -605,7 +605,7 @@ void imprimirPolaca(){
     }
 }
 void guardarPos(){
-	topePila++; // tope=-1 significa pila vac�a, el primer elemento de la pila esta en tope=0
+	topePila++; // tope=-1 significa pila vacía, el primer elemento de la pila esta en tope=0
 	pilaPolaca[topePila]=posActual;
 	posActual++;
 }
@@ -616,6 +616,14 @@ int pedirPos(){
 	    return retorno;
 	}else{
 	    return -1;
+	}
+}
+void escribirPosicionEnTodaLaPila(int num){
+	char c[20];
+	while(topePila>=0){
+        	char cad[20];
+	        itoa(num, cad, 10);
+            strcpy(vecPolaca[ pedirPos() ],cad);
 	}
 }
 void grabarPolaca(){
