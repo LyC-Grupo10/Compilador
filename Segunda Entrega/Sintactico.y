@@ -265,12 +265,12 @@ condicion:
             ;
 
 comparacion:
-            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n");  insertarPolaca("CMP"); insertarPolaca("BEQ"); guardarPos();}
-            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();}
-            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BGE"); guardarPos();}
-            | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos();}
-            | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos();}
-            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BNE"); guardarPos();}
+            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n");  insertarPolaca("CMP"); insertarPolaca("BNE"); guardarPos();}
+            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos();}
+            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos();}
+            | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();}
+            | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGE"); guardarPos();}
+            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BEQ"); guardarPos();}
             ;
 
 expresion:
