@@ -65,6 +65,7 @@ void guardarPos();
 int pedirPos();
 void imprimirPolaca();
 void escribirPosicionEnTodaLaPila(int);
+char * insertarPolacaEnPosicion(const int, const int);
 %}
 
 %union {
@@ -246,7 +247,10 @@ asignacion:
 
 seleccion:
             IF PAR_A condicion PAR_C LL_A bloque LL_C {printf("IF\n"); escribirPosicionEnTodaLaPila(posActual);}
-            | IF PAR_A condicion PAR_C LL_A bloque LL_C ELSE LL_A {escribirPosicionEnTodaLaPila(posActual);} bloque LL_C {printf("IF-ELSE\n"); }
+            | IF PAR_A condicion PAR_C LL_A bloque LL_C {
+                insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); guardarPos();
+              } 
+              ELSE LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); }
             ;
 
 iteracion: 
@@ -265,12 +269,12 @@ condicion:
             ;
 
 comparacion:
-            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n");  insertarPolaca("CMP"); insertarPolaca("BNE"); guardarPos();}
-            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos();}
-            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos();}
+            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BNE"); guardarPos();}
+            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos();}
+            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos();}
             | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();}
             | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGE"); guardarPos();}
-            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n");insertarPolaca("CMP"); insertarPolaca("BEQ"); guardarPos();}
+            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BEQ"); guardarPos();}
             ;
 
 expresion:
@@ -632,5 +636,12 @@ void grabarPolaca(){
 	for (i=0;i<posActual;i++){
 	fprintf(pf,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
 	}
-
+}
+/**
+* Esta función está pensada para cuando desapilamos el valor
+* de una celda y lo debemos insertar en la polaca. 
+*/
+char * insertarPolacaEnPosicion(const int posicion, const int valorCelda){
+    char aux[6]; //Ponele que tenemos hasta 1M celdas.
+    return strcpy(vecPolaca[posicion], itoa(valorCelda, aux, 10));
 }
