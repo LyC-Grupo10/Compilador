@@ -245,8 +245,8 @@ asignacion:
             ;
 
 seleccion:
-            IF PAR_A condicion PAR_C LL_A sentencia LL_C {printf("IF\n"); escribirPosicionEnTodaLaPila(posActual);}
-            | IF PAR_A condicion PAR_C LL_A sentencia LL_C ELSE LL_A {escribirPosicionEnTodaLaPila(posActual);} sentencia LL_C {printf("IF-ELSE\n"); }
+            IF PAR_A condicion PAR_C LL_A bloque LL_C {printf("IF\n"); escribirPosicionEnTodaLaPila(posActual);}
+            | IF PAR_A condicion PAR_C LL_A bloque LL_C ELSE LL_A {escribirPosicionEnTodaLaPila(posActual);} bloque LL_C {printf("IF-ELSE\n"); }
             ;
 
 iteracion: 
