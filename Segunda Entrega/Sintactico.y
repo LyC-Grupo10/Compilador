@@ -246,7 +246,7 @@ asignacion:
             ;
 
 seleccion:
-            IF PAR_A condicion PAR_C LL_A bloque LL_C {printf("IF\n"); escribirPosicionEnTodaLaPila(posActual);}
+            IF PAR_A condicion PAR_C LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); }
             | IF PAR_A condicion PAR_C LL_A bloque LL_C {
                 insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); guardarPos();
               } 
