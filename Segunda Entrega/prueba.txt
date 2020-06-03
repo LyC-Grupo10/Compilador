@@ -3,13 +3,19 @@ int: a; c; i
 ENDDEF
 
 BEGINP
-if(a > 5){
+if((a > 5) and (c <= 10)){
  	c = 5;
 }
 else {
-	if(a < 10){
+	if((a < 10) or (a==3)){
 		c = 10;
 	}
 	i = 7;
+}
+
+
+if(between(i, [3;(c*2)+a]) or between(a, [0;5]))
+{
+	display "Hola";
 }
 ENDP

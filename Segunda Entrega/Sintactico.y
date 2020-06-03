@@ -52,7 +52,7 @@ int esNumero(const char*,char*);
 char mensajes[100];
 
 /* ---  Polaca   --- */
-char vecPolaca[500][50];
+char vecPolaca[500][50], auxBet[50];
 int pilaPolaca[50];
 int posActual=0,topePila=-1;
 
@@ -64,8 +64,10 @@ void grabarPolaca();
 void guardarPos();
 int pedirPos();
 void imprimirPolaca();
-void escribirPosicionEnTodaLaPila(int);
+//void escribirPosicionEnTodaLaPila(int);
+void escribirPosicionEnTodaLaPila(int, int);
 char * insertarPolacaEnPosicion(const int, const int);
+int delta=0, deltaElse=0;
 %}
 
 %union {
@@ -128,7 +130,7 @@ char *tipo_str;
 
 PROGRAMA:
         bloque_declaraciones algoritmo
-        { guardarTS(); printf("\nCompilacion OK.\n"); grabarPolaca();}
+        { guardarTS(); grabarPolaca(); printf("\nCompilacion OK.\n"); }
         ;
 
 bloque_declaraciones:
@@ -142,7 +144,7 @@ declaraciones:
 
 declaracion:
              INT DOSPUNTOS lista_variables  {
-                                                for(i=0;i<cantid;i++) /*vamos agregando todos los ids que leyo*/
+                                                for(i=0; i<cantid; i++) //vamos agregando todos los ids que leyo
                                                 {
                                                     if(insertarTS(idvec[i], "INT", "", 0, 0) != 0) //no lo guarda porque ya existe
                                                     {
@@ -150,27 +152,27 @@ declaracion:
                                                         yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
                                                     }
                                                 }
-                                                cantid=0;
+                                                cantid = 0;
                                             } 
             | STRING DOSPUNTOS lista_variables  {
-                                                    for(i=0;i<cantid;i++)
+                                                    for(i=0; i<cantid; i++)
                                                     {
                                                         if(insertarTS(idvec[i], "STRING", "", 0, 0) != 0)
                                                         {
                                                             sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
                                                             yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
                                                         }
-                                                    } cantid=0;
+                                                    } cantid = 0;
                                                 }
             | FLOAT DOSPUNTOS lista_variables   {
-                                                    for(i=0;i<cantid;i++)
+                                                    for(i=0; i<cantid; i++)
                                                     {
                                                         if(insertarTS(idvec[i], "FLOAT", "", 0, 0) != 0)
                                                         {
                                                             sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
                                                             yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
                                                         }
-                                                    } cantid=0;
+                                                    } cantid = 0;
                                                 }
             ;
 
@@ -181,13 +183,13 @@ lista_variables:
                         strcpy(idvec[cantid], punt); /*copiamos al array de ids*/
                         cantid++;
                     }
-                |ID {
+                | ID {
                         strcpy(vecAux, yylval.tipo_str); /*se repite aca tambien, no lo toma de arriba*/
                         punt = strtok(vecAux, " ;\n");
                         strcpy(idvec[cantid], punt);
                         cantid++;
-                    } 
-                PUNTOYCOMA lista_variables
+                    }
+                    PUNTOYCOMA lista_variables
                 ;
 
 algoritmo:
@@ -208,7 +210,9 @@ sentencia:
             ;
 
 salida:
-        DISPLAY CONST_STR PUNTOYCOMA {printf("Display OK\n");}
+        //esto lo puse así porque necesitaba probar
+        DISPLAY factor PUNTOYCOMA { insertarPolaca("DISPLAY"); }
+        /*DISPLAY CONST_STR PUNTOYCOMA {printf("Display OK\n");}
         | DISPLAY ID PUNTOYCOMA {
                                     char error[50];
                                     strcpy(vecAux, $2);
@@ -219,7 +223,7 @@ salida:
                                     }
                                     printf("Display OK\n");
                                 }
-        ;
+        ;*/
 
 entrada:
         GET ID PUNTOYCOMA { 
@@ -242,16 +246,21 @@ asignacion:
                                                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                                                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                                                 }
+                                                //ver aca el orden de la asignacion
+                                                insertarPolaca(punt);
+                                                insertarPolaca("=");
                                             }
             ;
 
-seleccion:
-            IF PAR_A condicion PAR_C LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); }
-            | IF PAR_A condicion PAR_C LL_A bloque LL_C {
-                insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); guardarPos();
-              } 
-              ELSE LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); }
-            ;
+seleccion: //usa un delta para saber cuantas comparaciones hay y a cuantas celdas tiene que asignarle el valor a dónde branchear
+            IF PAR_A condicion PAR_C LL_A bloque LL_C {escribirPosicionEnTodaLaPila(delta, posActual); delta=0; }
+            | IF PAR_A condicion PAR_C LL_A bloque LL_C
+            ELSE { insertarPolaca("BI");
+                    escribirPosicionEnTodaLaPila(delta, posActual +1);
+                    delta=0; //reinicia, ya desapilo todo lo que le corresponde a ese if
+                    guardarPos(); 
+                    deltaElse++;} //para else es un delta distinto, de lo contrario, desapila todos los demas que estan antes del else y no tienen nada que ver
+            LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); deltaElse--; } //aca sí saca de a uno porque no va a haber mas de un else en un if
 
 iteracion: 
             WHILE PAR_A condicion PAR_C LL_A bloque LL_C {printf("WHILE\n");}
@@ -265,16 +274,16 @@ condicion:
             | PAR_A comparacion PAR_C OP_AND PAR_A comparacion PAR_C {printf("AND\n");}
             | PAR_A comparacion PAR_C OP_OR PAR_A comparacion PAR_C {printf("OR\n");}
             | OP_NOT PAR_A comparacion PAR_C{printf("NOT\n");}
-            | between
             ;
 
 comparacion:
-            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BNE"); guardarPos();}
-            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos();}
-            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos();}
-            | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();}
-            | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGE"); guardarPos();}
-            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BEQ"); guardarPos();}
+            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BNE"); guardarPos(); delta++;}
+            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos(); delta++;}
+            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos(); delta++;}
+            | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos(); delta++;}
+            | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGE"); guardarPos(); delta++;}
+            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BEQ"); guardarPos(); delta++;}
+            | between {delta += 2;} //aca suma de a dos porque between tiene dos comparaciones
             ;
 
 expresion:
@@ -289,16 +298,17 @@ termino:
         | factor
         ;
 
-factor:/*verificando aca en este ID si existe o no, se cubre en todas las apariciones en el codigo fuente????*/
+factor:/*verificando aca en este ID si existe o no, se cubre en todas las apariciones en el codigo fuente????
+        //creo que no, habría que hacerlo cada vez que aparezca el no terminal*/
         ID {
                 strcpy(vecAux, $1);
-                punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado*/
-                if(!existeID(punt)) /*No existe: entonces no esta declarada --> error*/
+                punt = strtok(vecAux," +-*/[](){}:=,\n");
+                if(!existeID(punt)) /*No esta declarada*/
                 {
                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                 }
-
+                insertarPolaca(punt);
            }
         | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$); insertarPolacaInt($<tipo_int>$);}
         | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %g\n", $<tipo_double>$); insertarPolacaDouble($<tipo_double>$);}
@@ -308,36 +318,7 @@ factor:/*verificando aca en este ID si existe o no, se cubre en todas las aparic
         | factorial
         ;
 
-expresionNumerica:
-            expresionNumerica OP_SUMA terminoNumerico {printf("Suma OK\n");}
-            | expresionNumerica OP_RESTA terminoNumerico {printf("Resta OK\n");}
-            | terminoNumerico
-            ;
-
-terminoNumerico:
-        terminoNumerico OP_MULT factorNumerico {printf("Multiplicacion OK\n");}
-        | terminoNumerico OP_DIV factorNumerico {printf("Division OK\n");}
-        | factorNumerico
-        ;
-
-factorNumerico:
-        ID {
-                char error[50];
-                strcpy(vecAux, $1);
-                punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado*/
-                if(!esNumero(punt,error)) /*No existe: entonces no esta declarada --> error*/
-                {
-                    sprintf(mensajes, "%s", error);
-                    yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
-                }
-           }
-        | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$);}
-        | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %f\n", $<tipo_double>$);}
-        | PAR_A expresionNumerica PAR_C
-        | combinatorio
-        | factorial
-        ;
-
+        
 combinatorio:
         COMB PAR_A expresionNumerica COMA expresionNumerica PAR_C {printf("Combinatorio OK\n");}
         ;
@@ -347,8 +328,55 @@ factorial:
         ;
 
 between:
-        BETWEEN PAR_A ID COMA COR_A expresionNumerica PUNTOYCOMA expresionNumerica COR_C PAR_C {printf("Between OK\n");}
+        BETWEEN PAR_A ID {
+                            //ver que sea una variable numérica
+                            char error[50];
+                            strcpy(vecAux, $3);
+                            punt = strtok(vecAux," ;\n");
+                            if(!esNumero(punt, error))
+                            {
+                                sprintf(mensajes, "%s", error);
+                                yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                            }
+                            strcpy(auxBet, insertarPolaca(punt));
+                        }
+        COMA COR_A expresionNumerica { insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos(); }
+        PUNTOYCOMA { insertarPolaca(auxBet); }
+        expresionNumerica { insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos(); }
+        COR_C PAR_C
         ; 
+
+expresionNumerica:
+            expresionNumerica OP_SUMA terminoNumerico {insertarPolaca("+");}
+            | expresionNumerica OP_RESTA terminoNumerico {insertarPolaca("-");}
+            | terminoNumerico
+            ;
+
+terminoNumerico:
+        terminoNumerico OP_MULT factorNumerico {insertarPolaca("*");}
+        | terminoNumerico OP_DIV factorNumerico {insertarPolaca("/");}
+        | factorNumerico
+        ;
+
+factorNumerico:
+        ID {
+                char error[50];
+                strcpy(vecAux, $1);
+                punt = strtok(vecAux," +-*/[](){}:=,\n");
+                if(!esNumero(punt,error)) /*No existe: entonces no esta declarada --> error*/
+                {
+                    sprintf(mensajes, "%s", error);
+                    yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                }
+                insertarPolaca(punt);
+           }
+        | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$); insertarPolacaInt($<tipo_int>$); }
+        | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %f\n", $<tipo_double>$); insertarPolacaDouble($<tipo_double>$); }
+        | PAR_A expresionNumerica PAR_C
+        | combinatorio
+        | factorial
+        ;
+
 %%
 
 
@@ -363,7 +391,7 @@ int main(int argc, char *argv[])
     }
     else
     { 
-        crearTablaTS();//tablaTS.primero = NULL;
+        crearTablaTS();
         yyparse();
         fclose(yyin);
         system("Pause"); /*Esta pausa la puse para ver lo que hace via mensajes*/
@@ -445,7 +473,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         return data;
     }
     else
-    {      //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
+    {   //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
         if(strcmp(tipo, "CONST_STR") == 0)
         {
             data->valor.valor_str = (char*)malloc(sizeof(char) * strlen(valString) +1);
@@ -548,7 +576,7 @@ int existeID(const char* id) //y hasta diria que es igual para existeCTE
         b2 = strcmp(tabla->data.nombre, nombreCTE);
         if(b1 == 0 || b2 == 0)
         {
-            insertarPolaca(nombreCTE);
+            //insertarPolaca(nombreCTE);//creería que no corresponde agregarlo acá, va para la acción semántica
                 return 1;
         }
         tabla = tabla->next;
@@ -572,8 +600,8 @@ int esNumero(const char* id,char* error)
             }
             else
             {
-                strcpy(error,"Tipo de dato incorrecto");
-                sprintf(error,"%s%s%s","Error: tipo de dato de la variable '",id,"' incorrecto. Tipos permitidos: int y float");
+                strcpy(error,"Tipo de dato incorrecto"); //esta línea está de mas?
+                sprintf(error,"%s%s%s","Error: tipo de dato de la variable '",id,"' incorrecto. Los tipos permitidos son 'int' y 'float'");
                 return 0;
             }
         }
@@ -583,36 +611,43 @@ int esNumero(const char* id,char* error)
     return 0;
 }
 
-/**     Funciones Polaca    **/
+/*------ Funciones Polaca ------*/
+
 char* insertarPolaca(char * cad){
 	strcpy(vecPolaca[posActual],cad);
 	posActual++;
 	return cad;
 }
+
 void insertarPolacaInt(int entero){
 	char cad[20];
 	itoa(entero, cad, 10);
 	insertarPolaca(cad);
 }
+
 void insertarPolacaDouble(double real){
 	char cad[20];
 	sprintf(cad,"%.10f", real);
 	insertarPolaca(cad);
 }
+
 void avanzarPolaca(){
 	posActual++;
 }
+
 void imprimirPolaca(){
 	int i;
 	for (i=0;i<posActual;i++){
 	    printf("posActual: %d, valor: %s \r\n",i,vecPolaca[i]);
     }
 }
+
 void guardarPos(){
 	topePila++; // tope=-1 significa pila vacía, el primer elemento de la pila esta en tope=0
 	pilaPolaca[topePila]=posActual;
 	posActual++;
 }
+
 int pedirPos(){
 	if(topePila>-1){
 	    int retorno = pilaPolaca[topePila];
@@ -622,14 +657,27 @@ int pedirPos(){
 	    return -1;
 	}
 }
-void escribirPosicionEnTodaLaPila(int num){
-	char c[20];
-	while(topePila>=0){
-        	char cad[20];
-	        itoa(num, cad, 10);
-            strcpy(vecPolaca[ pedirPos() ],cad);
+
+// void escribirPosicionEnTodaLaPila(int num){
+// 	char c[20];
+// 	while(topePila>=0)
+//     {
+//         char cad[20];
+//         itoa(num, cad, 10);
+//         strcpy(vecPolaca[pedirPos()],cad);
+// 	}
+// }
+
+void escribirPosicionEnTodaLaPila(int cant, int celda){
+	while(cant > 0)
+    {
+        char cad[20];
+        itoa(celda, cad, 10);
+        strcpy(vecPolaca[pedirPos()],cad);
+        cant --;
 	}
 }
+
 void grabarPolaca(){
   FILE* pf = fopen("intermedia.txt","wt");
   int i;
@@ -637,10 +685,10 @@ void grabarPolaca(){
 	fprintf(pf,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
 	}
 }
-/**
-* Esta función está pensada para cuando desapilamos el valor
-* de una celda y lo debemos insertar en la polaca. 
-*/
+
+/* Esta función está pensada para cuando desapilamos el valor
+de una celda y lo debemos insertar en la polaca. */
+
 char * insertarPolacaEnPosicion(const int posicion, const int valorCelda){
     char aux[6]; //Ponele que tenemos hasta 1M celdas.
     return strcpy(vecPolaca[posicion], itoa(valorCelda, aux, 10));
