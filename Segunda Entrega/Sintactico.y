@@ -68,6 +68,7 @@ void imprimirPolaca();
 void escribirPosicionEnTodaLaPila(int, int);
 char * insertarPolacaEnPosicion(const int, const int);
 int delta=0, deltaElse=0;
+void notCondicion();
 %}
 
 %union {
@@ -270,10 +271,10 @@ condicion:
             comparacion
             | comparacion OP_AND comparacion {printf("AND\n");}
             | comparacion OP_OR comparacion {printf("OR\n");}
-            | OP_NOT comparacion {printf("NOT\n");}
+            | OP_NOT comparacion {printf("NOT\n"); notCondicion();}
             | PAR_A comparacion PAR_C OP_AND PAR_A comparacion PAR_C {printf("AND\n");}
             | PAR_A comparacion PAR_C OP_OR PAR_A comparacion PAR_C {printf("OR\n");}
-            | OP_NOT PAR_A comparacion PAR_C{printf("NOT\n");}
+            | OP_NOT PAR_A comparacion PAR_C{printf("NOT\n"); notCondicion();}
             ;
 
 comparacion:
@@ -692,4 +693,24 @@ de una celda y lo debemos insertar en la polaca. */
 char * insertarPolacaEnPosicion(const int posicion, const int valorCelda){
     char aux[6]; //Ponele que tenemos hasta 1M celdas.
     return strcpy(vecPolaca[posicion], itoa(valorCelda, aux, 10));
+}
+
+void notCondicion()
+{
+    char cad[50];
+    int i = posActual - 2 ;
+	strcpy(cad,vecPolaca[i]);
+    if(strcmp(cad, "BGE") == 0){
+		strcpy(vecPolaca[i], "BLT");
+	}else if(strcmp(cad, "BLT") == 0){
+		strcpy(vecPolaca[i], "BGE");
+	}else if(strcmp(cad, "BLE") == 0){
+		strcpy(vecPolaca[i], "BGT");
+	}else if(strcmp(cad, "BGT") == 0){
+		strcpy(vecPolaca[i], "BLE");
+	}else if(strcmp(cad, "BEQ") == 0){
+		strcpy(vecPolaca[i], "BNE");
+	}else if(strcmp(cad, "BNE") == 0){
+		strcpy(vecPolaca[i], "BEQ");
+	}
 }
