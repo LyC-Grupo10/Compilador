@@ -697,20 +697,24 @@ char * insertarPolacaEnPosicion(const int posicion, const int valorCelda){
 
 void notCondicion()
 {
-    char cad[50];
-    int i = posActual - 2 ;
-	strcpy(cad,vecPolaca[i]);
-    if(strcmp(cad, "BGE") == 0){
-		strcpy(vecPolaca[i], "BLT");
-	}else if(strcmp(cad, "BLT") == 0){
-		strcpy(vecPolaca[i], "BGE");
-	}else if(strcmp(cad, "BLE") == 0){
-		strcpy(vecPolaca[i], "BGT");
-	}else if(strcmp(cad, "BGT") == 0){
-		strcpy(vecPolaca[i], "BLE");
-	}else if(strcmp(cad, "BEQ") == 0){
-		strcpy(vecPolaca[i], "BNE");
-	}else if(strcmp(cad, "BNE") == 0){
-		strcpy(vecPolaca[i], "BEQ");
-	}
+    int j;
+    for( j=0; j<delta;j++){
+        char cad[50];
+        int k = topePila-j;
+        int i = pilaPolaca[k] - 1;
+        strcpy(cad,vecPolaca[i]);
+        if(strcmp(cad, "BGE") == 0){
+            strcpy(vecPolaca[i], "BLT");
+        }else if(strcmp(cad, "BLT") == 0){
+            strcpy(vecPolaca[i], "BGE");
+        }else if(strcmp(cad, "BLE") == 0){
+            strcpy(vecPolaca[i], "BGT");
+        }else if(strcmp(cad, "BGT") == 0){
+            strcpy(vecPolaca[i], "BLE");
+        }else if(strcmp(cad, "BEQ") == 0){
+            strcpy(vecPolaca[i], "BNE");
+        }else if(strcmp(cad, "BNE") == 0){
+            strcpy(vecPolaca[i], "BEQ");
+        }
+    }
 }

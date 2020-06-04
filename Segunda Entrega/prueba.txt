@@ -19,7 +19,7 @@ if(between(i, [3;(c*2)+a]) or between(a, [0;5]))
 	display "Hola";
 }
 
-if( not( a>3) )
+if(  between(i,[0;1]) )
 {
 	display "caca";
 }
