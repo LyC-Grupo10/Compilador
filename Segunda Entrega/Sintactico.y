@@ -206,7 +206,7 @@ bloque:
 sentencia:
             asignacion
             | { local++; } seleccion 
-            | iteracion
+            | { local++; } iteracion
             | salida
             | entrada
             ;
@@ -264,9 +264,15 @@ seleccion: //usa un delta para saber cuantas comparaciones hay y a cuantas celda
                     guardarPos(); 
                     deltaElse++;} //para else es un delta distinto, de lo contrario, desapila todos los demas que estan antes del else y no tienen nada que ver
             LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); deltaElse--; } //aca sí saca de a uno porque no va a haber mas de un else en un if
-
+            ;
 iteracion: 
-            WHILE PAR_A condicion PAR_C LL_A bloque LL_C {printf("WHILE\n");}
+            WHILE { guardarPos(); posActual--; insertarPolaca("ET"); } 
+            PAR_A condicion PAR_C LL_A bloque LL_C {
+                insertarPolaca("BI");
+                escribirPosicionEnTodaLaPila(vecif[local], posActual +1);
+                local--;
+                insertarPolacaInt(pedirPos());
+            }
             ;
 
 condicion:  //en condicion guardamos el delta correspondiente a cada if, para que no se pisen ni usen los deltas de otro

@@ -1,26 +1,25 @@
 DEFVAR
-int: a; c; i
+int: a; b; c; i; x
 ENDDEF
 
 BEGINP
-if((a > 5) and (c <= 10)){
+if(a > 5 and c <= 10){
  	c = 5;
 }
 else {
-	if((a < 10) or (a==3)){
+	if(a < 10 or a == 3){
 		c = 10;
 	}
 	i = 7;
 }
 
-
-if(between(i, [3;(c*2)+a]) or between(a, [0;5]))
-{
-	display "Hola";
+while(a > 1 or b > 1){
+	while(c > 1){
+		x = 1;
+	}
 }
 
-if(  between(i,[0;1]) )
-{
-	display "caca";
+if(between(i, [3; (c*2) + a]) or between(a, [0; 5])){
+	display "Hola";
 }
 ENDP
