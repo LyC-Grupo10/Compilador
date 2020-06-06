@@ -67,9 +67,9 @@ void imprimirPolaca();
 //void escribirPosicionEnTodaLaPila(int);
 void escribirPosicionEnTodaLaPila(int, int);
 char * insertarPolacaEnPosicion(const int, const int);
-int local=-1, delta=0, deltaElse=0;
+int local=-1, delta=0, deltaElse=0, hayOr=0;
 int vecif[50];
-void notCondicion();
+void notCondicion(int);
 %}
 
 %union {
@@ -136,7 +136,7 @@ PROGRAMA:
         ;
 
 bloque_declaraciones:
-                    DEFVAR declaraciones ENDDEF {printf("\nTermina el bloque de declaraciones de variables.\n");}
+                    DEFVAR declaraciones ENDDEF
                     ;
 
 declaraciones:
@@ -205,7 +205,7 @@ bloque:
 
 sentencia:
             asignacion
-            | seleccion { local++; }
+            | { local++; } seleccion 
             | iteracion
             | salida
             | entrada
@@ -255,11 +255,12 @@ asignacion:
             ;
 
 seleccion: //usa un delta para saber cuantas comparaciones hay y a cuantas celdas tiene que asignarle el valor a dónde branchear
+            //el delta, o sea, la cantidad, se guarda el el vector de ifs en su correspondiente posicion (dada por la var "local")
             IF PAR_A condicion PAR_C LL_A bloque LL_C { escribirPosicionEnTodaLaPila(vecif[local], posActual); local--; }
             | IF PAR_A condicion PAR_C LL_A bloque LL_C
             ELSE { insertarPolaca("BI");
                     escribirPosicionEnTodaLaPila(vecif[local], posActual +1);
-                    local--; //reinicia, ya desapilo todo lo que le corresponde a ese if
+                    local--; //decrementa local porque ese bloque if ya termino
                     guardarPos(); 
                     deltaElse++;} //para else es un delta distinto, de lo contrario, desapila todos los demas que estan antes del else y no tienen nada que ver
             LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); deltaElse--; } //aca sí saca de a uno porque no va a haber mas de un else en un if
@@ -268,23 +269,40 @@ iteracion:
             WHILE PAR_A condicion PAR_C LL_A bloque LL_C {printf("WHILE\n");}
             ;
 
-condicion:
+condicion:  //en condicion guardamos el delta correspondiente a cada if, para que no se pisen ni usen los deltas de otro
             comparacion { vecif[local] = delta; delta=0; }
             | comparacion OP_AND comparacion { vecif[local] = delta; delta=0; }
-            | comparacion OP_OR comparacion { vecif[local] = delta; delta=0; }
-            | OP_NOT comparacion { notCondicion(); vecif[local] = delta; delta=0; }
+            | comparacion {     //cuando ya lee la primera comparacion, avisamos que se trata de un OR
+                                hayOr=1;
+                                delta--; //decrementamos porque ya vamos a trabajar con esa celda ahora, no hace falta que lo haga arriba
+                                vecif[local] = delta;
+                                notCondicion(delta); //invierto el condicional: el salto va a ser adentro del bloque en lugar de al final
+            } OP_OR comparacion { vecif[local] = delta; delta=0; }
+            | OP_NOT comparacion { vecif[local] = delta; notCondicion(delta); delta=0;}
             | PAR_A comparacion PAR_C OP_AND PAR_A comparacion PAR_C { vecif[local] = delta; delta=0; }
-            | PAR_A comparacion PAR_C OP_OR PAR_A comparacion PAR_C { vecif[local] = delta; delta=0; }
-            | OP_NOT PAR_A comparacion PAR_C{notCondicion(); vecif[local] = delta; delta=0; }
+            | PAR_A comparacion PAR_C {
+                                        hayOr=1;
+                                        delta--;
+                                        vecif[local] = delta;
+                                        notCondicion(delta);
+            }           
+            OP_OR PAR_A comparacion PAR_C { vecif[local] = delta; delta=0; }
+            | OP_NOT PAR_A comparacion PAR_C { vecif[local] = delta; notCondicion(delta); delta=0;}
             ;
 
-comparacion:
-            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BNE"); guardarPos(); delta++;}
-            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos(); delta++;}
-            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos(); delta++;}
-            | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos(); delta++;}
-            | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGE"); guardarPos(); delta++;}
-            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BEQ"); guardarPos(); delta++;}
+comparacion: //aca vemos, si es un or, ya le setea a la comparacion anterior la celda a la que tiene que saltar adentro del bloque true
+            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BNE");
+                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGT");
+                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLT");
+                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+            | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLE");
+                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+            | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGE");
+                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BEQ");
+                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
             | between {delta += 2;} //aca suma de a dos porque between tiene dos comparaciones
             ;
 
@@ -696,14 +714,15 @@ char * insertarPolacaEnPosicion(const int posicion, const int valorCelda){
     return strcpy(vecPolaca[posicion], itoa(valorCelda, aux, 10));
 }
 
-void notCondicion()
+void notCondicion(int cant) //aca le pasamos por parametro el delta correspondiente a cada if
 {
     int j;
-    for( j=0; j<delta;j++){
+    for( j=0; j<=cant;j++){
         char cad[50];
         int k = topePila-j;
         int i = pilaPolaca[k] - 1;
         strcpy(cad,vecPolaca[i]);
+        
         if(strcmp(cad, "BGE") == 0){
             strcpy(vecPolaca[i], "BLT");
         }else if(strcmp(cad, "BLT") == 0){
