@@ -64,10 +64,9 @@ void grabarPolaca();
 void guardarPos();
 int pedirPos();
 void imprimirPolaca();
-//void escribirPosicionEnTodaLaPila(int);
 void escribirPosicionEnTodaLaPila(int, int);
 char * insertarPolacaEnPosicion(const int, const int);
-int local=-1, delta=0, deltaElse=0, hayOr=0;
+int local = -1, delta = 0, hayOr = 0;
 int vecif[50];
 void notCondicion(int);
 %}
@@ -132,7 +131,7 @@ char *tipo_str;
 
 PROGRAMA:
         bloque_declaraciones algoritmo
-        { guardarTS(); grabarPolaca(); printf("\nCompilacion OK.\n"); }
+        { guardarTS(); grabarPolaca(); printf("\nCompilacion OK! Ver archivo intermedia.txt\n\n"); }
         ;
 
 bloque_declaraciones:
@@ -248,34 +247,35 @@ asignacion:
                                                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                                                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                                                 }
-                                                //ver aca el orden de la asignacion
                                                 insertarPolaca(punt);
                                                 insertarPolaca("=");
                                             }
             ;
 
-seleccion: //usa un delta para saber cuantas comparaciones hay y a cuantas celdas tiene que asignarle el valor a dónde branchear
-            //el delta, o sea, la cantidad, se guarda el el vector de ifs en su correspondiente posicion (dada por la var "local")
+// Se usa un delta para saber cuántas comparaciones hay y a cuántas celdas se debe asignar el valor que indica dónde branchear.
+// Este delta se guarda en el vector de condiciones, la posición dentro del mismo es determinada x la variable "local".
+seleccion: 
             IF PAR_A condicion PAR_C LL_A bloque LL_C { escribirPosicionEnTodaLaPila(vecif[local], posActual); local--; }
             | IF PAR_A condicion PAR_C LL_A bloque LL_C
             ELSE { insertarPolaca("BI");
                     escribirPosicionEnTodaLaPila(vecif[local], posActual +1);
-                    local--; //decrementa local porque ese bloque if ya termino
+                    local--; //decrementa local porque ese bloque if ya terminó
                     guardarPos(); 
-                    deltaElse++;} //para else es un delta distinto, de lo contrario, desapila todos los demas que estan antes del else y no tienen nada que ver
-            LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); deltaElse--; } //aca sí saca de a uno porque no va a haber mas de un else en un if
+            }
+            LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); }
             ;
 iteracion: 
-            WHILE { guardarPos(); posActual--; insertarPolaca("ET"); } 
+            WHILE { insertarPolaca("ET"); posActual--; guardarPos(); } 
             PAR_A condicion PAR_C LL_A bloque LL_C {
                 insertarPolaca("BI");
                 escribirPosicionEnTodaLaPila(vecif[local], posActual +1);
-                local--;
+                local--; //decrementa local porque ese bloque while ya terminó
                 insertarPolacaInt(pedirPos());
             }
             ;
 
-condicion:  //en condicion guardamos el delta correspondiente a cada if, para que no se pisen ni usen los deltas de otro
+//Acá guardamos el delta correspondiente a cada if/while, para que no se pisen ni usen los deltas de otro.
+condicion:
             comparacion { vecif[local] = delta; delta=0; }
             | comparacion OP_AND comparacion { vecif[local] = delta; delta=0; }
             | comparacion {     //cuando ya lee la primera comparacion, avisamos que se trata de un OR
@@ -296,36 +296,36 @@ condicion:  //en condicion guardamos el delta correspondiente a cada if, para qu
             | OP_NOT PAR_A comparacion PAR_C { vecif[local] = delta; notCondicion(delta); delta=0;}
             ;
 
-comparacion: //aca vemos, si es un or, ya le setea a la comparacion anterior la celda a la que tiene que saltar adentro del bloque true
-            expresion COMP_BEQ expresion {printf("<expresion> == <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BNE");
+//Acá vemos si es un or, en tal caso, se setea a la comparación anterior la celda a la que tiene que saltar para ir al bloque true.
+comparacion:
+            expresion COMP_BEQ expresion { insertarPolaca("CMP"); insertarPolaca("BNE");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BLE expresion {printf("<expresion> <= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGT");
+            | expresion COMP_BLE expresion { insertarPolaca("CMP"); insertarPolaca("BGT");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BGE expresion {printf("<expresion> >= <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLT");
+            | expresion COMP_BGE expresion { insertarPolaca("CMP"); insertarPolaca("BLT");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BGT expresion{printf("<expresion> > <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BLE");
+            | expresion COMP_BGT expresion { insertarPolaca("CMP"); insertarPolaca("BLE");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BLT expresion{printf("<expresion> < <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BGE");
+            | expresion COMP_BLT expresion { insertarPolaca("CMP"); insertarPolaca("BGE");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BNE expresion{printf("<expresion> != <expresion>\n"); insertarPolaca("CMP"); insertarPolaca("BEQ");
+            | expresion COMP_BNE expresion { insertarPolaca("CMP"); insertarPolaca("BEQ");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
             | between {delta += 2;} //aca suma de a dos porque between tiene dos comparaciones
             ;
 
 expresion:
-            expresion OP_SUMA termino {printf("Suma OK\n");insertarPolaca("+");}
-            | expresion OP_RESTA termino {printf("Resta OK\n"); insertarPolaca("-");}
+            expresion OP_SUMA termino { insertarPolaca("+"); }
+            | expresion OP_RESTA termino { insertarPolaca("-"); }
             | termino
             ;
 
 termino:
-        termino OP_MULT factor {printf("Multiplicacion OK\n"); insertarPolaca("*");}
-        | termino OP_DIV factor {printf("Division OK\n"); insertarPolaca("/");}
+        termino OP_MULT factor { insertarPolaca("*"); }
+        | termino OP_DIV factor { insertarPolaca("/"); }
         | factor
         ;
 
-factor:/*verificando aca en este ID si existe o no, se cubre en todas las apariciones en el codigo fuente????
-        //creo que no, habría que hacerlo cada vez que aparezca el no terminal*/
+factor:
         ID {
                 strcpy(vecAux, $1);
                 punt = strtok(vecAux," +-*/[](){}:=,\n");
@@ -336,9 +336,9 @@ factor:/*verificando aca en este ID si existe o no, se cubre en todas las aparic
                 }
                 insertarPolaca(punt);
            }
-        | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$); insertarPolacaInt($<tipo_int>$);}
-        | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %g\n", $<tipo_double>$); insertarPolacaDouble($<tipo_double>$);}
-        | CONST_STR { $<tipo_str>$ = $1; printf("String: %s\n", $<tipo_str>$); insertarPolaca($<tipo_str>$);}
+        | CONST_INT { $<tipo_int>$ = $1; insertarPolacaInt($<tipo_int>$);}
+        | CONST_REAL { $<tipo_double>$ = $1; insertarPolacaDouble($<tipo_double>$);}
+        | CONST_STR { $<tipo_str>$ = $1; insertarPolaca($<tipo_str>$);}
         | PAR_A expresion PAR_C
         | combinatorio
         | factorial
@@ -396,8 +396,8 @@ factorNumerico:
                 }
                 insertarPolaca(punt);
            }
-        | CONST_INT { $<tipo_int>$ = $1; printf("CTE entera: %d\n", $<tipo_int>$); insertarPolacaInt($<tipo_int>$); }
-        | CONST_REAL { $<tipo_double>$ = $1; printf("CTE real: %f\n", $<tipo_double>$); insertarPolacaDouble($<tipo_double>$); }
+        | CONST_INT { $<tipo_int>$ = $1; insertarPolacaInt($<tipo_int>$); }
+        | CONST_REAL { $<tipo_double>$ = $1; insertarPolacaDouble($<tipo_double>$); }
         | PAR_A expresionNumerica PAR_C
         | combinatorio
         | factorial
@@ -587,9 +587,8 @@ void crearTablaTS()
     tablaTS.primero = NULL;
 }
 
-int existeID(const char* id) //y hasta diria que es igual para existeCTE
+int existeID(const char* id)
 {
-    //tengo que ver el tema del _ en el nombre de las cte
     t_simbolo *tabla = tablaTS.primero;
     char nombreCTE[32] = "_";
     strcat(nombreCTE, id);
@@ -600,10 +599,8 @@ int existeID(const char* id) //y hasta diria que es igual para existeCTE
     {   
         b1 = strcmp(tabla->data.nombre, id);
         b2 = strcmp(tabla->data.nombre, nombreCTE);
-        if(b1 == 0 || b2 == 0)
-        {
-            //insertarPolaca(nombreCTE);//creería que no corresponde agregarlo acá, va para la acción semántica
-                return 1;
+        if(b1 == 0 || b2 == 0){
+            return 1;
         }
         tabla = tabla->next;
     }
@@ -626,7 +623,6 @@ int esNumero(const char* id,char* error)
             }
             else
             {
-                strcpy(error,"Tipo de dato incorrecto"); //esta línea está de mas?
                 sprintf(error,"%s%s%s","Error: tipo de dato de la variable '",id,"' incorrecto. Los tipos permitidos son 'int' y 'float'");
                 return 0;
             }
@@ -683,16 +679,6 @@ int pedirPos(){
 	    return -1;
 	}
 }
-
-// void escribirPosicionEnTodaLaPila(int num){
-// 	char c[20];
-// 	while(topePila>=0)
-//     {
-//         char cad[20];
-//         itoa(num, cad, 10);
-//         strcpy(vecPolaca[pedirPos()],cad);
-// 	}
-// }
 
 void escribirPosicionEnTodaLaPila(int cant, int celda){
 	while(cant > 0)
