@@ -67,7 +67,8 @@ void imprimirPolaca();
 //void escribirPosicionEnTodaLaPila(int);
 void escribirPosicionEnTodaLaPila(int, int);
 char * insertarPolacaEnPosicion(const int, const int);
-int delta=0, deltaElse=0;
+int local=-1, delta=0, deltaElse=0;
+int vecif[50];
 void notCondicion();
 %}
 
@@ -204,7 +205,7 @@ bloque:
 
 sentencia:
             asignacion
-            | seleccion
+            | seleccion { local++; }
             | iteracion
             | salida
             | entrada
@@ -254,11 +255,11 @@ asignacion:
             ;
 
 seleccion: //usa un delta para saber cuantas comparaciones hay y a cuantas celdas tiene que asignarle el valor a dónde branchear
-            IF PAR_A condicion PAR_C LL_A bloque LL_C {escribirPosicionEnTodaLaPila(delta, posActual); delta=0; }
+            IF PAR_A condicion PAR_C LL_A bloque LL_C { escribirPosicionEnTodaLaPila(vecif[local], posActual); local--; }
             | IF PAR_A condicion PAR_C LL_A bloque LL_C
             ELSE { insertarPolaca("BI");
-                    escribirPosicionEnTodaLaPila(delta, posActual +1);
-                    delta=0; //reinicia, ya desapilo todo lo que le corresponde a ese if
+                    escribirPosicionEnTodaLaPila(vecif[local], posActual +1);
+                    local--; //reinicia, ya desapilo todo lo que le corresponde a ese if
                     guardarPos(); 
                     deltaElse++;} //para else es un delta distinto, de lo contrario, desapila todos los demas que estan antes del else y no tienen nada que ver
             LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); deltaElse--; } //aca sí saca de a uno porque no va a haber mas de un else en un if
@@ -268,13 +269,13 @@ iteracion:
             ;
 
 condicion:
-            comparacion
-            | comparacion OP_AND comparacion {printf("AND\n");}
-            | comparacion OP_OR comparacion {printf("OR\n");}
-            | OP_NOT comparacion {printf("NOT\n"); notCondicion();}
-            | PAR_A comparacion PAR_C OP_AND PAR_A comparacion PAR_C {printf("AND\n");}
-            | PAR_A comparacion PAR_C OP_OR PAR_A comparacion PAR_C {printf("OR\n");}
-            | OP_NOT PAR_A comparacion PAR_C{printf("NOT\n"); notCondicion();}
+            comparacion { vecif[local] = delta; delta=0; }
+            | comparacion OP_AND comparacion { vecif[local] = delta; delta=0; }
+            | comparacion OP_OR comparacion { vecif[local] = delta; delta=0; }
+            | OP_NOT comparacion { notCondicion(); vecif[local] = delta; delta=0; }
+            | PAR_A comparacion PAR_C OP_AND PAR_A comparacion PAR_C { vecif[local] = delta; delta=0; }
+            | PAR_A comparacion PAR_C OP_OR PAR_A comparacion PAR_C { vecif[local] = delta; delta=0; }
+            | OP_NOT PAR_A comparacion PAR_C{notCondicion(); vecif[local] = delta; delta=0; }
             ;
 
 comparacion:
