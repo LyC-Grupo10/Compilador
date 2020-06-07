@@ -211,9 +211,13 @@ sentencia:
             ;
 
 salida:
-        //esto lo puse así porque necesitaba probar
-        DISPLAY factor PUNTOYCOMA { insertarPolaca("DISPLAY"); }
-        /*DISPLAY CONST_STR PUNTOYCOMA {printf("Display OK\n");}
+        DISPLAY CONST_STR PUNTOYCOMA { 
+                                        strcpy(vecAux, $2);
+                                        strtok(vecAux," ;\n");
+                                        insertarPolaca(vecAux);
+                                        insertarPolaca("DISPLAY");
+
+                                    }
         | DISPLAY ID PUNTOYCOMA {
                                     char error[50];
                                     strcpy(vecAux, $2);
@@ -222,9 +226,10 @@ salida:
                                         sprintf(mensajes, "%s", error);
                                         yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                                     }
-                                    printf("Display OK\n");
+                                    insertarPolaca(vecAux);
+                                    insertarPolaca("DISPLAY");
                                 }
-        ;*/
+        ;
 
 entrada:
         GET ID PUNTOYCOMA { 
@@ -234,7 +239,8 @@ entrada:
                                 sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                                 yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                             }
-                            printf("Get OK\n");
+                            insertarPolaca(vecAux);
+                            insertarPolaca("GET");
                         }
         ;        
 

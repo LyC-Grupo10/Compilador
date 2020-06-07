@@ -4,10 +4,11 @@ b                             INT                           --                  
 c                             INT                           --                            1
 i                             INT                           --                            1
 x                             INT                           --                            1
+z                             STRING                        --                            1
 _5                            CONST_INT                     5                             1
 _10                           CONST_INT                     10                            2
 _3                            CONST_INT                     3                             1
 _7                            CONST_INT                     7                             1
 _1                            CONST_INT                     1                             1
 _2                            CONST_INT                     2                             1
-_"Hola"                       CONST_STR                     "Hola"                        6
+_"Test"                       CONST_STR                     "Test"                        6

@@ -67,5 +67,9 @@ pos: 65, valor: +
 pos: 66, valor: CMP 
 pos: 67, valor: BGT 
 pos: 68, valor: 71 
-pos: 69, valor: "Hola" 
+pos: 69, valor: "Test" 
 pos: 70, valor: DISPLAY 
+pos: 71, valor: a 
+pos: 72, valor: DISPLAY 
+pos: 73, valor: z 
+pos: 74, valor: GET 

@@ -1,5 +1,6 @@
 DEFVAR
 int: a; b; c; i; x
+string: z
 ENDDEF
 
 BEGINP
@@ -20,6 +21,11 @@ while(a > 1 or b > 1){
 }
 
 if(between(i, [3; (c*2) + a])){
-	display "Hola";
+	display "Test";
 }
+
+display a;
+
+get z;
+
 ENDP
