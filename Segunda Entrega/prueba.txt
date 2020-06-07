@@ -30,4 +30,6 @@ get z;
 
 a = fact(a+b);
 
+c = comb(a,b);
+
 ENDP

@@ -15,3 +15,9 @@ _"Test"                       CONST_STR                     "Test"              
 _var                          INT                           --                            4
 _aux                          INT                           --                            4
 _res                          INT                           --                            4
+_varN                         INT                           --                            5
+_resN                         INT                           --                            5
+_varM                         INT                           --                            5
+_resM                         INT                           --                            5
+_varNM                        INT                           --                            6
+_resNM                        INT                           --                            6

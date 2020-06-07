@@ -69,6 +69,7 @@ char * insertarPolacaEnPosicion(const int, const int);
 int local = -1, delta = 0, hayOr = 0;
 int vecif[50];
 void notCondicion(int);
+void calcularFactorial(char *, char *);
 %}
 
 %union {
@@ -352,29 +353,25 @@ factor:
 
         
 combinatorio:
-        COMB PAR_A expresionNumerica COMA expresionNumerica PAR_C {printf("Combinatorio OK\n");}
+        COMB PAR_A expresionNumerica { insertarPolaca("varN"); insertarPolaca("="); } 
+        COMA expresionNumerica 	{ insertarPolaca("varM"); insertarPolaca("="); } PAR_C {
+            calcularFactorial("varN","resN");
+            calcularFactorial("varM","resM");
+            insertarPolaca("varN");
+            insertarPolaca("varM");
+            insertarPolaca("-");
+            calcularFactorial("varNM","resNM");
+            insertarPolaca("resN");
+            insertarPolaca("resM");
+            insertarPolaca("/");
+            insertarPolaca("resNM");
+            insertarPolaca("/");
+        }
         ;
 
 factorial:
-        FACT PAR_A expresionNumerica PAR_C {
-            
-            insertarTS("_var", "INT", "", 0, 0);
-            insertarTS("_aux", "INT", "", 0, 0);
-            insertarTS("_res", "INT", "", 0, 0);
- 
-            insertarPolaca("var"); insertarPolaca("=");
-            insertarPolaca("var"); insertarPolaca("aux"); insertarPolaca("=");
-            insertarPolaca("var"); insertarPolaca("res"); insertarPolaca("=");  
-            
-            insertarPolaca("ET"); posActual--; guardarPos(); 
-            insertarPolaca("aux"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
-            
-            insertarPolaca("res"); insertarPolaca("aux"); insertarPolacaInt(1);
-            insertarPolaca("-"); insertarPolaca("*"); insertarPolaca("res"); insertarPolaca("=");
-            insertarPolaca("aux"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("aux"); insertarPolaca("="); 
-            
-            insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); insertarPolacaInt(pedirPos());
-            
+        FACT PAR_A expresionNumerica PAR_C {           
+            calcularFactorial("var","res");
             insertarPolaca("res");
         }
         ;
@@ -756,3 +753,33 @@ void notCondicion(int cant) //aca le pasamos por parametro el delta correspondie
         }
     }
 }
+
+void calcularFactorial(char * var, char * res)
+{	
+	char vecVarFact [] = "_";
+	char vecResFact [] = "_";
+	strcat(vecVarFact,var);
+
+	insertarTS(vecVarFact, "INT", "", 0, 0);
+	
+    insertarTS("_aux", "INT", "", 0, 0);
+
+	strcat(vecResFact,res);
+
+    insertarTS(vecResFact, "INT", "", 0, 0);
+
+    insertarPolaca(var); insertarPolaca("=");
+    insertarPolaca(var); insertarPolaca("aux"); insertarPolaca("=");
+    insertarPolaca(var); insertarPolaca(res); insertarPolaca("=");  
+    
+    insertarPolaca("ET"); posActual--; guardarPos(); 
+    insertarPolaca("aux"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
+    
+    insertarPolaca(res); insertarPolaca("aux"); insertarPolacaInt(1);
+    insertarPolaca("-"); insertarPolaca("*"); insertarPolaca(res); insertarPolaca("=");
+    insertarPolaca("aux"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("aux"); insertarPolaca("="); 
+    
+    insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); insertarPolacaInt(pedirPos());
+}
+
+
