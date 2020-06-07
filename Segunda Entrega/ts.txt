@@ -12,3 +12,6 @@ _7                            CONST_INT                     7                   
 _1                            CONST_INT                     1                             1
 _2                            CONST_INT                     2                             1
 _"Test"                       CONST_STR                     "Test"                        6
+_var                          INT                           --                            4
+_aux                          INT                           --                            4
+_res                          INT                           --                            4

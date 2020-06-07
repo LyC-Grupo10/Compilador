@@ -356,7 +356,27 @@ combinatorio:
         ;
 
 factorial:
-        FACT PAR_A expresionNumerica PAR_C {printf("Factorial OK\n");}
+        FACT PAR_A expresionNumerica PAR_C {
+            
+            insertarTS("_var", "INT", "", 0, 0);
+            insertarTS("_aux", "INT", "", 0, 0);
+            insertarTS("_res", "INT", "", 0, 0);
+ 
+            insertarPolaca("var"); insertarPolaca("=");
+            insertarPolaca("var"); insertarPolaca("aux"); insertarPolaca("=");
+            insertarPolaca("var"); insertarPolaca("res"); insertarPolaca("=");  
+            
+            insertarPolaca("ET"); posActual--; guardarPos(); 
+            insertarPolaca("aux"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
+            
+            insertarPolaca("res"); insertarPolaca("aux"); insertarPolacaInt(1);
+            insertarPolaca("-"); insertarPolaca("*"); insertarPolaca("res"); insertarPolaca("=");
+            insertarPolaca("aux"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("aux"); insertarPolaca("="); 
+            
+            insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); insertarPolacaInt(pedirPos());
+            
+            insertarPolaca("res");
+        }
         ;
 
 between:

@@ -28,4 +28,6 @@ display a;
 
 get z;
 
+a = fact(a+b);
+
 ENDP
