@@ -869,14 +869,12 @@ void crearSeccionData(FILE *archAssembler){
         aux = tablaSimbolos;
         tablaSimbolos = tablaSimbolos->next;
         
-        //Empieza con las variables
         if(strcmp(aux->data.tipo, "INT") == 0){
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", "?", "; Variable int");
         }
         else if(strcmp(aux->data.tipo, "FLOAT") == 0){
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", "?", "; Variable float");
         }
-        //acá tendríamos que ver cómo hacemos si de esta var se desconoce el valor
         else if(strcmp(aux->data.tipo, "STRING") == 0){ 
             fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "db", "?", "; Variable string");
         }
