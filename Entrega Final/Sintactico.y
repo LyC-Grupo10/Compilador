@@ -818,21 +818,21 @@ void generarAssembler(){
     {
 	    if(esValor(vecPolaca[i]))
         {
-            apilarValor( vecPolaca[i] );
+            //apilarValor(vecPolaca[i]);
         }
-        else if( esComparacion( vecPolaca[i]) )
+        else if(esComparacion(vecPolaca[i]))
         {
             
         }
-        else if( esSalto( vecPolaca[i]) )
+        else if(esSalto(vecPolaca[i]))
         {
 
         }
-        else if( esGet( vecPolaca[i] ))
+        else if(esGet(vecPolaca[i]))
         {
             fprintf(archAssembler,"GET en assembler\n");
         }
-        else if( esDisplay( vecPolaca[i] ))
+        else if(esDisplay( vecPolaca[i]))
         {
             fprintf(archAssembler,"DISPLAY en assembler\n");
         }
@@ -851,7 +851,7 @@ void generarAssembler(){
             fprintf(archAssembler, "FSTP %s\n", vecPolaca[i]);
             i++; //avanza la polaca para saltear la variable ya usada            
         }
-        else if( esOperacion( vecPolaca[i] ))
+        else if(esOperacion(vecPolaca[i]))
         {
             
         }
@@ -927,31 +927,35 @@ void crearFooter(FILE *archAssembler){
     fprintf(archAssembler, "%s\n\n%s", "int 21h", "END");
 }
 
-bool esValor( char * str )
+bool esValor(char * str)
 {
     /*** aca hay que valdar si es un numero o un id o una cte ***/
-    return false;
+    //Si es valor, tiene que estar en la tabla de símbolos guiño guño
+    return existeID(str) == 1;
 }
-void apilarValor( char * str )
+void apilarValor(char * str)
 {
     /*** aca tendria que guardar ese valor en una pila ***/
 }
-bool esComparacion( char * str )
+bool esComparacion(char * str)
 {
-    return false;
-}
-bool esSalto( char * str )
-{
-    return false;
-}
-bool esGet( char * str )
-{
-    int aux = strcmp( str, "GET" );
+    int aux = strcmp(str, "CMP");
     return aux == 0;
 }
-bool esDisplay( char * str )
+bool esSalto(char * str)
 {
-    int aux = strcmp( str, "DISPLAY" );
+    //aca deberiamos poner todos los saltos o se refiere al BI?
+    //los Bxx se contempan junto al CMP? como por ejemplo, pasa en la asignación que se mueve acorde a lo que usa
+    return false;
+}
+bool esGet(char * str)
+{
+    int aux = strcmp(str, "GET");
+    return aux == 0;
+}
+bool esDisplay(char * str)
+{
+    int aux = strcmp(str, "DISPLAY");
     return aux == 0;
 }
 bool esAsignacion(char * str)
@@ -959,7 +963,7 @@ bool esAsignacion(char * str)
     int aux = strcmp(str, "=");
     return aux == 0;
 }
-bool esOperacion( char * str )
+bool esOperacion(char * str)
 {
     return false;
 }
