@@ -72,10 +72,14 @@ int vecif[50];
 void notCondicion(int);
 void calcularFactorial(char *, char *);
 
-/* ---  Assembler   --- */
-void genera_assembler();
+/* --- Assembler --- */
 char pilaAssembler[500][50];
 int topePilaAssembler=0;
+void generarAssembler();
+void crearHeader(FILE *);
+void crearSeccionData(FILE *);
+void crearSeccionCode(FILE *);
+void crearFooter(FILE *);
 bool esValor( char * str );
 void apilarValor( char * str );
 bool esComparacion( char * str );
@@ -147,7 +151,7 @@ char *tipo_str;
 
 PROGRAMA:
         bloque_declaraciones algoritmo
-        { guardarTS(); grabarPolaca(); printf("\nCompilacion OK! Ver archivo intermedia.txt\n\n"); genera_assembler(); }
+        { guardarTS(); grabarPolaca(); generarAssembler(); printf("\nCompilacion OK! Ver archivo final.asm\n\n"); }
         ;
 
 bloque_declaraciones:
@@ -734,7 +738,7 @@ void grabarPolaca(){
 	for (i=0;i<posActual;i++){
 	fprintf(pf,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
 	}
-    fclose( pf );
+    fclose(pf);
 }
 
 /* Esta función está pensada para cuando desapilamos el valor
@@ -798,9 +802,16 @@ void calcularFactorial(char * var, char * res)
     insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); insertarPolacaInt(pedirPos());
 }
 
-void genera_assembler(){
-    FILE *final = fopen("Final.asm","wt");
-    /*** aca iria el header y todo ese tema  ***/
+/* --- Funciones para Assembler --- */
+
+void generarAssembler(){
+    FILE* archAssembler = fopen("final.asm","wt");
+
+    crearHeader(archAssembler);
+    crearSeccionData(archAssembler);
+    crearSeccionCode(archAssembler);
+
+    //Código propiamente dicho   
     int i;
     for (i=0;i<posActual;i++){
 	    if( esValor(vecPolaca[i]) )
@@ -817,11 +828,11 @@ void genera_assembler(){
         }
         else if( esGet( vecPolaca[i] ))
         {
-            fprintf(final,"GET en assembler\n");
+            fprintf(archAssembler,"GET en assembler\n");
         }
         else if( esDisplay( vecPolaca[i] ))
         {
-            fprintf(final,"DISPLAY en assembler\n");
+            fprintf(archAssembler,"DISPLAY en assembler\n");
         }
         else if( esAsignacion( vecPolaca[i] ))
         {
@@ -831,10 +842,47 @@ void genera_assembler(){
         {
             
         }
-        fprintf(final,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
-	}
-    /*** aca iria lo que indica el fin de ejecucion ***/
-    fclose(final);
+        fprintf(archAssembler,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
+	}      
+    //Fin código propiamente dicho
+
+    crearFooter(archAssembler);
+    fclose(archAssembler);
+}
+
+//Faltan los include, me tengo qué fijar cómo se hacía
+void crearHeader(FILE *archAssembler){
+    fprintf(archAssembler, "%-30s%-30s\n", ".MODEL LARGE", "; Modelo de memoria");
+    fprintf(archAssembler, "%-30s%-30s\n", ".386", "; Tipo de procesador");
+    fprintf(archAssembler, "%-30s%-30s\n\n", ".STACK 200h", "; Bytes en el stack");
+}
+
+//En desarrollo
+void crearSeccionData(FILE *archAssembler){
+    t_simbolo *aux;
+    t_simbolo *tablaSimbolos = tablaTS.primero;
+
+    while(tablaSimbolos){
+        aux = tablaSimbolos;
+        tablaSimbolos = tablaSimbolos->next;
+        
+        if(strcmp(aux->data.tipo, "INT") == 0){
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dc", "?", "; Variable int");
+        }
+    }
+}
+
+/* Habría que ver si los registros deben ir en mayúscula o en minúscula
+   En caso de que puedan en ambas, los ponemos en mayúscula? */
+void crearSeccionCode(FILE *archAssembler){
+    fprintf(archAssembler, "\n%s\n\n", ".CODE");
+    fprintf(archAssembler, "%-30s%-30s\n", "mov AX,@DATA", "; Inicializa el segmento de datos");
+    fprintf(archAssembler, "%-30s\n%-30s\n\n", "mov DS,AX", "mov es,ax");
+}
+
+void crearFooter(FILE *archAssembler){
+    fprintf(archAssembler, "%-30s%-30s\n", "mov AX,4C00h", "; Indica que debe finalizar la ejecución");
+    fprintf(archAssembler, "%s\n\n%s", "int 21h", "END");
 }
 
 bool esValor( char * str )

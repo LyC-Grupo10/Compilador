@@ -1,3 +1,23 @@
+.MODEL LARGE                  ; Modelo de memoria           
+.386                          ; Tipo de procesador          
+.STACK 200h                   ; Bytes en el stack           
+
+_var           dc             ?              ; Variable int 
+_aux           dc             ?              ; Variable int 
+_res           dc             ?              ; Variable int 
+_varN          dc             ?              ; Variable int 
+_resN          dc             ?              ; Variable int 
+_varM          dc             ?              ; Variable int 
+_resM          dc             ?              ; Variable int 
+_varNM         dc             ?              ; Variable int 
+_resNM         dc             ?              ; Variable int 
+
+.CODE
+
+mov AX,@DATA                  ; Inicializa el segmento de datos
+mov DS,AX                     
+mov es,ax                     
+
 pos: 0, valor: a 
 pos: 1, valor: 5 
 pos: 2, valor: CMP 
@@ -228,3 +248,7 @@ pos: 220, valor: resNM
 pos: 221, valor: / 
 pos: 222, valor: c 
 pos: 223, valor: = 
+mov AX,4C00h                  ; Indica que debe finalizar la ejecución
+int 21h
+
+END
