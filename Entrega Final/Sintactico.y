@@ -851,7 +851,6 @@ void generarAssembler(){
     fclose(archAssembler);
 }
 
-//Faltan los include, me tengo qué fijar cómo se hacía
 void crearHeader(FILE *archAssembler){
     fprintf(archAssembler, "%s\n%s\n\n", "include number.asm", "include macros2.asm");
     fprintf(archAssembler, "%-30s%-30s\n", ".MODEL LARGE", "; Modelo de memoria");
