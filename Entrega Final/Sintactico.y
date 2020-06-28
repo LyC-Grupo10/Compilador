@@ -789,16 +789,16 @@ void calcularFactorial(char * var, char * res)
 
     insertarTS(vecResFact, "INT", "", 0, 0);
 
-    insertarPolaca(var); insertarPolaca("=");
-    insertarPolaca(var); insertarPolaca("aux"); insertarPolaca("=");
-    insertarPolaca(var); insertarPolaca(res); insertarPolaca("=");  
+    insertarPolaca("="); insertarPolaca(var); 
+    insertarPolaca(var); insertarPolaca("="); insertarPolaca("aux");
+    insertarPolaca(var); insertarPolaca("=");  insertarPolaca(res); 
     
     insertarPolaca("ET"); posActual--; guardarPos(); 
     insertarPolaca("aux"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
     
     insertarPolaca(res); insertarPolaca("aux"); insertarPolacaInt(1);
-    insertarPolaca("-"); insertarPolaca("*"); insertarPolaca(res); insertarPolaca("=");
-    insertarPolaca("aux"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("aux"); insertarPolaca("="); 
+    insertarPolaca("-"); insertarPolaca("*"); insertarPolaca("="); insertarPolaca(res);
+    insertarPolaca("aux"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("="); insertarPolaca("aux");
     
     insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); insertarPolacaInt(pedirPos());
 }
