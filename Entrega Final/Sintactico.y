@@ -816,7 +816,7 @@ void generarAssembler(){
     int i;
     for(i=0; i<posActual; i++)
     {
-	    if( esValor(vecPolaca[i]) )
+	    if(esValor(vecPolaca[i]))
         {
             apilarValor( vecPolaca[i] );
         }
@@ -838,7 +838,18 @@ void generarAssembler(){
         }
         else if(esAsignacion(vecPolaca[i]))
         {
-
+            /*
+            1. Saltearme el = para poder leer la variable
+            2. Grabar la asignacion en el archivo final
+            3. Avanzar la polaca para saltearme la variable que acabo de usar
+            */
+            
+            //Entonces, me salteo el = en la polaca
+            avanzarPolaca(); //también i++
+            i++;
+            //grabo en el archivo la instruccion con la variable
+            fprintf(archAssembler, "FSTP %s\n", vecPolaca[i]);
+            i++; //avanza la polaca para saltear la variable ya usada            
         }
         else if( esOperacion( vecPolaca[i] ))
         {

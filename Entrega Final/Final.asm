@@ -51,8 +51,7 @@ pos: 7, valor: CMP
 pos: 8, valor: BGT 
 pos: 9, valor: 15 
 pos: 10, valor: 5 
-pos: 11, valor: = 
-pos: 12, valor: c 
+FSTP c
 pos: 13, valor: BI 
 pos: 14, valor: 35 
 pos: 15, valor: a 
@@ -66,16 +65,14 @@ pos: 22, valor: CMP
 pos: 23, valor: BNE 
 pos: 24, valor: 30 
 pos: 25, valor: 10 
-pos: 26, valor: = 
-pos: 27, valor: c 
+FSTP c
 pos: 28, valor: BI 
 pos: 29, valor: 32 
 pos: 30, valor: "else" 
 DISPLAY en assembler
 pos: 31, valor: DISPLAY 
 pos: 32, valor: 7 
-pos: 33, valor: = 
-pos: 34, valor: i 
+FSTP i
 pos: 35, valor: ET 
 pos: 36, valor: a 
 pos: 37, valor: 1 
@@ -94,8 +91,7 @@ pos: 49, valor: CMP
 pos: 50, valor: BLE 
 pos: 51, valor: 68 
 pos: 52, valor: 1 
-pos: 53, valor: = 
-pos: 54, valor: x 
+FSTP x
 pos: 55, valor: c 
 pos: 56, valor: 10 
 pos: 57, valor: CMP 
@@ -139,14 +135,11 @@ pos: 89, valor: GET
 pos: 90, valor: a 
 pos: 91, valor: b 
 pos: 92, valor: + 
-pos: 93, valor: = 
-pos: 94, valor: var 
+FSTP var
 pos: 95, valor: var 
-pos: 96, valor: = 
-pos: 97, valor: aux 
+FSTP aux
 pos: 98, valor: var 
-pos: 99, valor: = 
-pos: 100, valor: res 
+FSTP res
 pos: 101, valor: ET 
 pos: 102, valor: aux 
 pos: 103, valor: 2 
@@ -158,32 +151,25 @@ pos: 108, valor: aux
 pos: 109, valor: 1 
 pos: 110, valor: - 
 pos: 111, valor: * 
-pos: 112, valor: = 
-pos: 113, valor: res 
+FSTP res
 pos: 114, valor: aux 
 pos: 115, valor: 1 
 pos: 116, valor: - 
-pos: 117, valor: = 
-pos: 118, valor: aux 
+FSTP aux
 pos: 119, valor: BI 
 pos: 120, valor: 101 
 pos: 121, valor: res 
-pos: 122, valor: = 
-pos: 123, valor: a 
+FSTP a
 pos: 124, valor: a 
-pos: 125, valor: = 
-pos: 126, valor: varN 
+FSTP varN
 pos: 127, valor: b 
-pos: 128, valor: = 
-pos: 129, valor: varM 
+FSTP varM
 pos: 130, valor: = 
 pos: 131, valor: varN 
 pos: 132, valor: varN 
-pos: 133, valor: = 
-pos: 134, valor: aux 
+FSTP aux
 pos: 135, valor: varN 
-pos: 136, valor: = 
-pos: 137, valor: resN 
+FSTP resN
 pos: 138, valor: ET 
 pos: 139, valor: aux 
 pos: 140, valor: 2 
@@ -195,23 +181,18 @@ pos: 145, valor: aux
 pos: 146, valor: 1 
 pos: 147, valor: - 
 pos: 148, valor: * 
-pos: 149, valor: = 
-pos: 150, valor: resN 
+FSTP resN
 pos: 151, valor: aux 
 pos: 152, valor: 1 
 pos: 153, valor: - 
-pos: 154, valor: = 
-pos: 155, valor: aux 
+FSTP aux
 pos: 156, valor: BI 
 pos: 157, valor: 138 
-pos: 158, valor: = 
-pos: 159, valor: varM 
+FSTP varM
 pos: 160, valor: varM 
-pos: 161, valor: = 
-pos: 162, valor: aux 
+FSTP aux
 pos: 163, valor: varM 
-pos: 164, valor: = 
-pos: 165, valor: resM 
+FSTP resM
 pos: 166, valor: ET 
 pos: 167, valor: aux 
 pos: 168, valor: 2 
@@ -223,26 +204,21 @@ pos: 173, valor: aux
 pos: 174, valor: 1 
 pos: 175, valor: - 
 pos: 176, valor: * 
-pos: 177, valor: = 
-pos: 178, valor: resM 
+FSTP resM
 pos: 179, valor: aux 
 pos: 180, valor: 1 
 pos: 181, valor: - 
-pos: 182, valor: = 
-pos: 183, valor: aux 
+FSTP aux
 pos: 184, valor: BI 
 pos: 185, valor: 166 
 pos: 186, valor: varN 
 pos: 187, valor: varM 
 pos: 188, valor: - 
-pos: 189, valor: = 
-pos: 190, valor: varNM 
+FSTP varNM
 pos: 191, valor: varNM 
-pos: 192, valor: = 
-pos: 193, valor: aux 
+FSTP aux
 pos: 194, valor: varNM 
-pos: 195, valor: = 
-pos: 196, valor: resNM 
+FSTP resNM
 pos: 197, valor: ET 
 pos: 198, valor: aux 
 pos: 199, valor: 2 
@@ -254,13 +230,11 @@ pos: 204, valor: aux
 pos: 205, valor: 1 
 pos: 206, valor: - 
 pos: 207, valor: * 
-pos: 208, valor: = 
-pos: 209, valor: resNM 
+FSTP resNM
 pos: 210, valor: aux 
 pos: 211, valor: 1 
 pos: 212, valor: - 
-pos: 213, valor: = 
-pos: 214, valor: aux 
+FSTP aux
 pos: 215, valor: BI 
 pos: 216, valor: 197 
 pos: 217, valor: resN 
@@ -268,8 +242,34 @@ pos: 218, valor: resM
 pos: 219, valor: / 
 pos: 220, valor: resNM 
 pos: 221, valor: / 
-pos: 222, valor: = 
-pos: 223, valor: c 
+FSTP c
+pos: 224, valor:  
+pos: 225, valor:  
+pos: 226, valor:  
+pos: 227, valor:  
+pos: 228, valor:  
+pos: 229, valor:  
+pos: 230, valor:  
+pos: 231, valor:  
+pos: 232, valor:  
+pos: 233, valor:  
+pos: 234, valor:  
+pos: 235, valor:  
+pos: 236, valor:  
+pos: 237, valor:  
+pos: 238, valor:  
+pos: 239, valor:  
+pos: 240, valor:  
+pos: 241, valor:  
+pos: 242, valor:  
+pos: 243, valor:  
+pos: 244, valor:  
+pos: 245, valor:  
+pos: 246, valor:  
+pos: 247, valor:  
+pos: 248, valor:  
+pos: 249, valor:  
+pos: 250, valor:  
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución
 int 21h
 
