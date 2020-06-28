@@ -373,8 +373,8 @@ factor:
 
         
 combinatorio:
-        COMB PAR_A expresionNumerica { insertarPolaca("varN"); insertarPolaca("="); } 
-        COMA expresionNumerica 	{ insertarPolaca("varM"); insertarPolaca("="); } PAR_C {
+        COMB PAR_A expresionNumerica { insertarPolaca("="); insertarPolaca("varN"); } 
+        COMA expresionNumerica 	{ insertarPolaca("="); insertarPolaca("varM"); } PAR_C {
             calcularFactorial("varN","resN");
             calcularFactorial("varM","resM");
             insertarPolaca("varN");
@@ -814,7 +814,8 @@ void generarAssembler(){
 
     //Código propiamente dicho   
     int i;
-    for (i=0;i<posActual;i++){
+    for(i=0; i<posActual; i++)
+    {
 	    if( esValor(vecPolaca[i]) )
         {
             apilarValor( vecPolaca[i] );
@@ -835,9 +836,9 @@ void generarAssembler(){
         {
             fprintf(archAssembler,"DISPLAY en assembler\n");
         }
-        else if( esAsignacion( vecPolaca[i] ))
+        else if(esAsignacion(vecPolaca[i]))
         {
-            
+
         }
         else if( esOperacion( vecPolaca[i] ))
         {
@@ -858,7 +859,6 @@ void crearHeader(FILE *archAssembler){
     fprintf(archAssembler, "%-30s%-30s\n\n", ".STACK 200h", "; Bytes en el stack");
 }
 
-//En desarrollo
 void crearSeccionData(FILE *archAssembler){
     t_simbolo *aux;
     t_simbolo *tablaSimbolos = tablaTS.primero;
@@ -943,9 +943,9 @@ bool esDisplay( char * str )
     int aux = strcmp( str, "DISPLAY" );
     return aux == 0;
 }
-bool esAsignacion( char * str )
+bool esAsignacion(char * str)
 {
-    int aux = strcmp( str, "=" );
+    int aux = strcmp(str, "=");
     return aux == 0;
 }
 bool esOperacion( char * str )

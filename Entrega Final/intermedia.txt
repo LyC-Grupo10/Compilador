@@ -123,11 +123,11 @@ pos: 121, valor: res
 pos: 122, valor: = 
 pos: 123, valor: a 
 pos: 124, valor: a 
-pos: 125, valor: varN 
-pos: 126, valor: = 
+pos: 125, valor: = 
+pos: 126, valor: varN 
 pos: 127, valor: b 
-pos: 128, valor: varM 
-pos: 129, valor: = 
+pos: 128, valor: = 
+pos: 129, valor: varM 
 pos: 130, valor: = 
 pos: 131, valor: varN 
 pos: 132, valor: varN 
