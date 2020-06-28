@@ -111,7 +111,21 @@ LL_C            ["}"]
 {TEXTO}         {
                     yylval.tipo_str = yytext;
                     validarString(yylval.tipo_str);
-                    insertarTS(yylval.tipo_str, "CONST_STR", yylval.tipo_str, 0, 0);
+                    int longitud = strlen(yylval.tipo_str);
+                    char aux[longitud];
+                    strcpy(aux, yylval.tipo_str);
+                    char cadena[longitud];
+                    int i,j=0;
+                    for(i=0;i<longitud;i++)
+                    {
+                        if(aux[i] != '"')
+                        {
+                            cadena[j] = aux[i];
+                            j++;
+                        }
+                    }
+                    cadena[j] = '\0';
+                    insertarTS(cadena, "CONST_STR", yylval.tipo_str, 0, 0);
                     return CONST_STR;
                 }
 {CONST_REAL}    {

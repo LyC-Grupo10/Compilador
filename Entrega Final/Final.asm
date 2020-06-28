@@ -1,16 +1,38 @@
+include number.asm
+include macros2.asm
+
 .MODEL LARGE                  ; Modelo de memoria           
 .386                          ; Tipo de procesador          
 .STACK 200h                   ; Bytes en el stack           
 
-_var           dc             ?              ; Variable int 
-_aux           dc             ?              ; Variable int 
-_res           dc             ?              ; Variable int 
-_varN          dc             ?              ; Variable int 
-_resN          dc             ?              ; Variable int 
-_varM          dc             ?              ; Variable int 
-_resM          dc             ?              ; Variable int 
-_varNM         dc             ?              ; Variable int 
-_resNM         dc             ?              ; Variable int 
+
+.DATA
+
+a              dd             ?              ; Variable int 
+b              dd             ?              ; Variable int 
+c              dd             ?              ; Variable int 
+i              dd             ?              ; Variable int 
+x              dd             ?              ; Variable int 
+z              db             ?, '$', dup (?); Variable string
+_5             dd             5.0            ; Constante int
+_10            dd             10.0           ; Constante int
+_3             dd             3.0            ; Constante int
+_else          db             "else", '$', 4 dup (?); Constante string
+_7             dd             7.0            ; Constante int
+_1             dd             1.0            ; Constante int
+_menor         db             "menor", '$', 5 dup (?); Constante string
+_mayor         db             "mayor", '$', 5 dup (?); Constante string
+_2             dd             2.0            ; Constante int
+_Test          db             "Test", '$', 4 dup (?); Constante string
+_var           dd             ?              ; Variable int 
+_aux           dd             ?              ; Variable int 
+_res           dd             ?              ; Variable int 
+_varN          dd             ?              ; Variable int 
+_resN          dd             ?              ; Variable int 
+_varM          dd             ?              ; Variable int 
+_resM          dd             ?              ; Variable int 
+_varNM         dd             ?              ; Variable int 
+_resNM         dd             ?              ; Variable int 
 
 .CODE
 
@@ -29,8 +51,8 @@ pos: 7, valor: CMP
 pos: 8, valor: BGT 
 pos: 9, valor: 15 
 pos: 10, valor: 5 
-pos: 11, valor: c 
-pos: 12, valor: = 
+pos: 11, valor: = 
+pos: 12, valor: c 
 pos: 13, valor: BI 
 pos: 14, valor: 35 
 pos: 15, valor: a 
@@ -44,16 +66,16 @@ pos: 22, valor: CMP
 pos: 23, valor: BNE 
 pos: 24, valor: 30 
 pos: 25, valor: 10 
-pos: 26, valor: c 
-pos: 27, valor: = 
+pos: 26, valor: = 
+pos: 27, valor: c 
 pos: 28, valor: BI 
 pos: 29, valor: 32 
 pos: 30, valor: "else" 
 DISPLAY en assembler
 pos: 31, valor: DISPLAY 
 pos: 32, valor: 7 
-pos: 33, valor: i 
-pos: 34, valor: = 
+pos: 33, valor: = 
+pos: 34, valor: i 
 pos: 35, valor: ET 
 pos: 36, valor: a 
 pos: 37, valor: 1 
@@ -72,8 +94,8 @@ pos: 49, valor: CMP
 pos: 50, valor: BLE 
 pos: 51, valor: 68 
 pos: 52, valor: 1 
-pos: 53, valor: x 
-pos: 54, valor: = 
+pos: 53, valor: = 
+pos: 54, valor: x 
 pos: 55, valor: c 
 pos: 56, valor: 10 
 pos: 57, valor: CMP 
@@ -146,8 +168,8 @@ pos: 118, valor: =
 pos: 119, valor: BI 
 pos: 120, valor: 101 
 pos: 121, valor: res 
-pos: 122, valor: a 
-pos: 123, valor: = 
+pos: 122, valor: = 
+pos: 123, valor: a 
 pos: 124, valor: a 
 pos: 125, valor: varN 
 pos: 126, valor: = 
@@ -246,8 +268,8 @@ pos: 218, valor: resM
 pos: 219, valor: / 
 pos: 220, valor: resNM 
 pos: 221, valor: / 
-pos: 222, valor: c 
-pos: 223, valor: = 
+pos: 222, valor: = 
+pos: 223, valor: c 
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución
 int 21h
 

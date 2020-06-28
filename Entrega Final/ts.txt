@@ -8,13 +8,13 @@ z                             STRING                        --                  
 _5                            CONST_INT                     5                             1
 _10                           CONST_INT                     10                            2
 _3                            CONST_INT                     3                             1
-_"else"                       CONST_STR                     "else"                        6
+_else                         CONST_STR                     "else"                        4
 _7                            CONST_INT                     7                             1
 _1                            CONST_INT                     1                             1
-_"menor"                      CONST_STR                     "menor"                       7
-_"mayor"                      CONST_STR                     "mayor"                       7
+_menor                        CONST_STR                     "menor"                       5
+_mayor                        CONST_STR                     "mayor"                       5
 _2                            CONST_INT                     2                             1
-_"Test"                       CONST_STR                     "Test"                        6
+_Test                         CONST_STR                     "Test"                        4
 _var                          INT                           --                            4
 _aux                          INT                           --                            4
 _res                          INT                           --                            4

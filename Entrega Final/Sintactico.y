@@ -151,7 +151,7 @@ char *tipo_str;
 
 PROGRAMA:
         bloque_declaraciones algoritmo
-        { guardarTS(); grabarPolaca(); generarAssembler(); printf("\nCompilacion OK! Ver archivo final.asm\n\n"); }
+        { /*guardarTS(); */grabarPolaca(); generarAssembler(); guardarTS(); printf("\nCompilacion OK! Ver archivo Final.asm\n\n"); }
         ;
 
 bloque_declaraciones:
@@ -273,8 +273,8 @@ asignacion:
                                                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                                                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                                                 }
-                                                insertarPolaca(punt);
                                                 insertarPolaca("=");
+                                                insertarPolaca(punt); //ya tiene el cambiazo loco para asm
                                             }
             ;
 
@@ -290,6 +290,7 @@ seleccion:
             }
             LL_A bloque LL_C { insertarPolacaEnPosicion(pedirPos(), posActual); }
             ;
+
 iteracion: 
             WHILE { insertarPolaca("ET"); posActual--; guardarPos(); } 
             PAR_A condicion PAR_C LL_A bloque LL_C {
@@ -545,8 +546,8 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         if(strcmp(tipo, "CONST_STR") == 0)
         {
             data->valor.valor_str = (char*)malloc(sizeof(char) * strlen(valString) +1);
-            data->nombre = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
-            strcat(full, valString);
+            data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+            strcat(full, nombre);
             strcpy(data->nombre, full);    
             strcpy(data->valor.valor_str, valString);
         }
@@ -863,12 +864,44 @@ void crearSeccionData(FILE *archAssembler){
     t_simbolo *aux;
     t_simbolo *tablaSimbolos = tablaTS.primero;
 
+    fprintf(archAssembler, "\n%s\n\n", ".DATA");
+
     while(tablaSimbolos){
         aux = tablaSimbolos;
         tablaSimbolos = tablaSimbolos->next;
         
+        //Empieza con las variables
         if(strcmp(aux->data.tipo, "INT") == 0){
-            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dc", "?", "; Variable int");
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", "?", "; Variable int");
+        }
+        else if(strcmp(aux->data.tipo, "FLOAT") == 0){
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", "?", "; Variable float");
+        }
+        //acá tendríamos que ver cómo hacemos si de esta var se desconoce el valor
+        else if(strcmp(aux->data.tipo, "STRING") == 0){ 
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "db", "?, '$', dup (?)", "; Variable string");
+        }
+        else if(strcmp(aux->data.tipo, "CONST_INT") == 0){ 
+            char valor[50];
+            sprintf(valor, "%d", aux->data.valor.valor_int);
+            strcat(valor, ".0");
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", valor, "; Constante int");
+        }
+        else if(strcmp(aux->data.tipo, "CONST_REAL") == 0){ 
+            char valor[50];
+            sprintf(valor, "%g", aux->data.valor.valor_double); //tenemos que ver si al nombre le sacamos el punto
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", valor, "; Constante float");
+        }
+        else if(strcmp(aux->data.tipo, "CONST_STR") == 0){ //ver de "T_<string>" para el nombre
+            char param[50];
+            strcpy(param, aux->data.valor.valor_str);
+            strcat(param, ", '$', ");
+            char valor[50];
+            sprintf(valor, "%d", strlen(aux->data.valor.valor_str) - 2); //2 comillas
+            strcat(param, valor);
+            strcat(param, " dup (?)");
+
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "db", param, "; Constante string");
         }
     }
 }
