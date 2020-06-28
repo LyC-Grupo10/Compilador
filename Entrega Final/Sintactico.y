@@ -800,7 +800,7 @@ void calcularFactorial(char * var, char * res)
 
 void genera_assembler(){
     FILE *final = fopen("Final.asm","wt");
-    /*** Y aca iria toda la tercera entrega  ***/
+    /*** aca iria el header y todo ese tema  ***/
     int i;
     for (i=0;i<posActual;i++){
 	    if( esValor(vecPolaca[i]) )
@@ -833,6 +833,7 @@ void genera_assembler(){
         }
         fprintf(final,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
 	}
+    /*** aca iria lo que indica el fin de ejecucion ***/
     fclose(final);
 }
 
