@@ -878,7 +878,7 @@ void crearSeccionData(FILE *archAssembler){
         }
         //acá tendríamos que ver cómo hacemos si de esta var se desconoce el valor
         else if(strcmp(aux->data.tipo, "STRING") == 0){ 
-            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "db", "?, '$', dup (?)", "; Variable string");
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "db", "?", "; Variable string");
         }
         else if(strcmp(aux->data.tipo, "CONST_INT") == 0){ 
             char valor[50];
