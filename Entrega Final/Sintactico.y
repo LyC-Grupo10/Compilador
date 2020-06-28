@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <conio.h>
 #include "y.tab.h"
 #define YYERROR_VERBOSE 1
@@ -73,6 +74,17 @@ void calcularFactorial(char *, char *);
 
 /* ---  Assembler   --- */
 void genera_assembler();
+char pilaAssembler[500][50];
+int topePilaAssembler=0;
+bool esValor( char * str );
+void apilarValor( char * str );
+bool esComparacion( char * str );
+bool esSalto( char * str );
+bool esGet( char * str );
+bool esDisplay( char * str );
+bool esAsignacion( char * str );
+bool esOperacion( char * str );
+
 %}
 
 %union {
@@ -722,6 +734,7 @@ void grabarPolaca(){
 	for (i=0;i<posActual;i++){
 	fprintf(pf,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
 	}
+    fclose( pf );
 }
 
 /* Esta función está pensada para cuando desapilamos el valor
@@ -788,5 +801,74 @@ void calcularFactorial(char * var, char * res)
 void genera_assembler(){
     FILE *final = fopen("Final.asm","wt");
     /*** Y aca iria toda la tercera entrega  ***/
+    int i;
+    for (i=0;i<posActual;i++){
+	    if( esValor(vecPolaca[i]) )
+        {
+            apilarValor( vecPolaca[i] );
+        }
+        else if( esComparacion( vecPolaca[i]) )
+        {
+            
+        }
+        else if( esSalto( vecPolaca[i]) )
+        {
+
+        }
+        else if( esGet( vecPolaca[i] ))
+        {
+            fprintf(final,"GET en assembler\n");
+        }
+        else if( esDisplay( vecPolaca[i] ))
+        {
+            fprintf(final,"DISPLAY en assembler\n");
+        }
+        else if( esAsignacion( vecPolaca[i] ))
+        {
+            
+        }
+        else if( esOperacion( vecPolaca[i] ))
+        {
+            
+        }
+        fprintf(final,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
+	}
     fclose(final);
+}
+
+bool esValor( char * str )
+{
+    /*** aca hay que valdar si es un numero o un id o una cte ***/
+    return false;
+}
+void apilarValor( char * str )
+{
+    /*** aca tendria que guardar ese valor en una pila ***/
+}
+bool esComparacion( char * str )
+{
+    return false;
+}
+bool esSalto( char * str )
+{
+    return false;
+}
+bool esGet( char * str )
+{
+    int aux = strcmp( str, "GET" );
+    return aux == 0;
+}
+bool esDisplay( char * str )
+{
+    int aux = strcmp( str, "DISPLAY" );
+    return aux == 0;
+}
+bool esAsignacion( char * str )
+{
+    int aux = strcmp( str, "=" );
+    return aux == 0;
+}
+bool esOperacion( char * str )
+{
+    return false;
 }
