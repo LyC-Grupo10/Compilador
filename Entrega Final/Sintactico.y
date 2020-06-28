@@ -70,6 +70,9 @@ int local = -1, delta = 0, hayOr = 0;
 int vecif[50];
 void notCondicion(int);
 void calcularFactorial(char *, char *);
+
+/* ---  Assembler   --- */
+void genera_assembler();
 %}
 
 %union {
@@ -132,7 +135,7 @@ char *tipo_str;
 
 PROGRAMA:
         bloque_declaraciones algoritmo
-        { guardarTS(); grabarPolaca(); printf("\nCompilacion OK! Ver archivo intermedia.txt\n\n"); }
+        { guardarTS(); grabarPolaca(); printf("\nCompilacion OK! Ver archivo intermedia.txt\n\n"); genera_assembler(); }
         ;
 
 bloque_declaraciones:
@@ -782,4 +785,8 @@ void calcularFactorial(char * var, char * res)
     insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); insertarPolacaInt(pedirPos());
 }
 
-
+void genera_assembler(){
+    FILE *final = fopen("Final.asm","wt");
+    /*** Y aca iria toda la tercera entrega  ***/
+    fclose(final);
+}
