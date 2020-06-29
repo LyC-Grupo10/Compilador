@@ -40,6 +40,7 @@ void crearTablaTS();
 int insertarTS(const char*, const char*, const char*, int, double);
 t_data* crearDatos(const char*, const char*, const char*, int, double);
 void guardarTS();
+t_simbolo * getLexema(const char *);
 t_tabla tablaTS;
 
 char idvec[32][50];
@@ -80,7 +81,7 @@ void crearHeader(FILE *);
 void crearSeccionData(FILE *);
 void crearSeccionCode(FILE *);
 void crearFooter(FILE *);
-bool esValor( char * str );
+bool esValor(const char * str);
 void apilarValor( char * str );
 bool esComparacion( char * str );
 bool esSalto( char * str );
@@ -630,6 +631,25 @@ void crearTablaTS()
     tablaTS.primero = NULL;
 }
 
+t_simbolo * getLexema(const char *valor){
+    t_simbolo *lexema;
+    t_simbolo *tablaSimbolos = tablaTS.primero;
+    char nombreCTE[32] = "_";
+    strcat(nombreCTE, valor);
+    int esID, esCTE;
+
+    while(tablaSimbolos){   
+        esID = strcmp(tablaSimbolos->data.nombre, valor);
+        esCTE = strcmp(tablaSimbolos->data.nombre, nombreCTE);
+        if(esID == 0 || esCTE == 0){
+            lexema = tablaSimbolos;
+            return lexema;
+        }
+        tablaSimbolos = tablaSimbolos->next;
+    }
+    return NULL;
+}
+
 int existeID(const char* id)
 {
     t_simbolo *tabla = tablaTS.primero;
@@ -816,8 +836,9 @@ void generarAssembler(){
     int i;
     for(i=0; i<posActual; i++){
 	    if(esValor(vecPolaca[i])){
+            t_simbolo *lexema = getLexema(vecPolaca[i]);
             //Seguramente haya que indicar, según el caso, un parámetro extra para fld
-            fprintf(archAssembler, "fld %s\n", vecPolaca[i]);
+            fprintf(archAssembler, "fld %s\n", lexema->data.nombre);
         }
         else if(esComparacion(vecPolaca[i]))
         {
@@ -920,12 +941,11 @@ void crearFooter(FILE *archAssembler){
     fprintf(archAssembler, "%s\n\n%s", "int 21h", "END inicio");
 }
 
-bool esValor(char * str)
-{
-    /*** aca hay que valdar si es un numero o un id o una cte ***/
-    //Si es valor, tiene que estar en la tabla de símbolos guiño guño
+bool esValor(const char * str){
+    //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
     return existeID(str) == 1;
-}
+} 
+
 void apilarValor(char * str)
 {
     /*** aca tendria que guardar ese valor en una pila ***/
