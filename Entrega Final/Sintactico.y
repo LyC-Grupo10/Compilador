@@ -910,14 +910,14 @@ void crearSeccionData(FILE *archAssembler){
 /* Habría que ver si los registros deben ir en mayúscula o en minúscula
    En caso de que puedan en ambas, los ponemos en mayúscula? */
 void crearSeccionCode(FILE *archAssembler){
-    fprintf(archAssembler, "\n%s\n\n", ".CODE");
+    fprintf(archAssembler, "\n%s\n\n%s\n\n", ".CODE", "inicio:");
     fprintf(archAssembler, "%-30s%-30s\n", "mov AX,@DATA", "; Inicializa el segmento de datos");
     fprintf(archAssembler, "%-30s\n%-30s\n\n", "mov DS,AX", "mov ES,AX");
 }
 
 void crearFooter(FILE *archAssembler){
     fprintf(archAssembler, "%-30s%-30s\n", "mov AX,4C00h", "; Indica que debe finalizar la ejecución");
-    fprintf(archAssembler, "%s\n\n%s", "int 21h", "END");
+    fprintf(archAssembler, "%s\n\n%s", "int 21h", "END inicio");
 }
 
 bool esValor(char * str)
