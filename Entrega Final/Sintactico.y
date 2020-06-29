@@ -87,8 +87,8 @@ bool esSalto( char * str );
 bool esGet( char * str );
 bool esDisplay( char * str );
 bool esAsignacion( char * str );
-bool esOperacion( char * str );
-
+bool esOperacion(const char *);
+char * getOperacion(const char *);
 %}
 
 %union {
@@ -814,11 +814,10 @@ void generarAssembler(){
 
     //Código propiamente dicho   
     int i;
-    for(i=0; i<posActual; i++)
-    {
-	    if(esValor(vecPolaca[i]))
-        {
-            //apilarValor(vecPolaca[i]);
+    for(i=0; i<posActual; i++){
+	    if(esValor(vecPolaca[i])){
+            //Seguramente haya que indicar, según el caso, un parámetro extra para fld
+            fprintf(archAssembler, "fld %s\n", vecPolaca[i]);
         }
         else if(esComparacion(vecPolaca[i]))
         {
@@ -836,26 +835,20 @@ void generarAssembler(){
         {
             fprintf(archAssembler,"DISPLAY en assembler\n");
         }
-        else if(esAsignacion(vecPolaca[i]))
-        {
+        else if(esAsignacion(vecPolaca[i])){
             /*
             1. Saltearme el = para poder leer la variable
             2. Grabar la asignacion en el archivo final
             3. Avanzar la polaca para saltearme la variable que acabo de usar
-            */
-            
+            */          
             //Entonces, me salteo el = en la polaca
-            avanzarPolaca(); //también i++
             i++;
             //grabo en el archivo la instruccion con la variable
-            fprintf(archAssembler, "FSTP %s\n", vecPolaca[i]);
-            i++; //avanza la polaca para saltear la variable ya usada            
+            fprintf(archAssembler, "fstp %s\n\n", vecPolaca[i]);          
         }
-        else if(esOperacion(vecPolaca[i]))
-        {
-            
+        else if(esOperacion(vecPolaca[i])){
+            fprintf(archAssembler, "%s\n", getOperacion(vecPolaca[i]));
         }
-        fprintf(archAssembler,"pos: %d, valor: %s \r\n",i,vecPolaca[i]);
 	}      
     //Fin código propiamente dicho
 
@@ -919,7 +912,7 @@ void crearSeccionData(FILE *archAssembler){
 void crearSeccionCode(FILE *archAssembler){
     fprintf(archAssembler, "\n%s\n\n", ".CODE");
     fprintf(archAssembler, "%-30s%-30s\n", "mov AX,@DATA", "; Inicializa el segmento de datos");
-    fprintf(archAssembler, "%-30s\n%-30s\n\n", "mov DS,AX", "mov es,ax");
+    fprintf(archAssembler, "%-30s\n%-30s\n\n", "mov DS,AX", "mov ES,AX");
 }
 
 void crearFooter(FILE *archAssembler){
@@ -963,7 +956,34 @@ bool esAsignacion(char * str)
     int aux = strcmp(str, "=");
     return aux == 0;
 }
-bool esOperacion(char * str)
-{
+
+bool esOperacion(const char * str){
+    if(strcmp(str, "+") == 0){
+       return true; 
+    }
+    else if(strcmp(str, "-") == 0){
+        return true;
+    }
+    else if(strcmp(str, "*") == 0){
+        return true;
+    }
+    else if(strcmp(str, "/") == 0){
+        return true;
+    }        
     return false;
+}
+ 
+char * getOperacion(const char * operacion){
+    if(strcmp(operacion, "+") == 0){
+       return "fadd"; 
+    }
+    else if(strcmp(operacion, "-") == 0){
+        return "fsub";
+    }
+    else if(strcmp(operacion, "*") == 0){
+        return "fmul";
+    }
+    else {
+        return "fdiv";
+    }
 }
