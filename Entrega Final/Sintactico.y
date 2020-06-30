@@ -41,6 +41,7 @@ int insertarTS(const char*, const char*, const char*, int, double);
 t_data* crearDatos(const char*, const char*, const char*, int, double);
 void guardarTS();
 t_simbolo * getLexema(const char *);
+char* limpiarString(char*, const char*);
 t_tabla tablaTS;
 
 char idvec[32][50];
@@ -373,26 +374,26 @@ factor:
 
         
 combinatorio:
-        COMB PAR_A expresionNumerica { insertarPolaca("="); insertarPolaca("varN"); } 
-        COMA expresionNumerica 	{ insertarPolaca("="); insertarPolaca("varM"); } PAR_C {
-            calcularFactorial("varN","resN");
-            calcularFactorial("varM","resM");
-            insertarPolaca("varN");
-            insertarPolaca("varM");
+        COMB PAR_A expresionNumerica { insertarPolaca("="); insertarPolaca("@varN"); } 
+        COMA expresionNumerica 	{ insertarPolaca("="); insertarPolaca("@varM"); } PAR_C {
+            calcularFactorial("@varN","@resN");
+            calcularFactorial("@varM","@resM");
+            insertarPolaca("@varN");
+            insertarPolaca("@varM");
             insertarPolaca("-");
-            calcularFactorial("varNM","resNM");
-            insertarPolaca("resN");
-            insertarPolaca("resM");
+            calcularFactorial("@varNM","@resNM");
+            insertarPolaca("@resN");
+            insertarPolaca("@resM");
             insertarPolaca("/");
-            insertarPolaca("resNM");
+            insertarPolaca("@resNM");
             insertarPolaca("/");
         }
         ;
 
 factorial:
         FACT PAR_A expresionNumerica PAR_C {           
-            calcularFactorial("var","res");
-            insertarPolaca("res");
+            calcularFactorial("@var","@res");
+            insertarPolaca("@res");
         }
         ;
 
@@ -468,6 +469,8 @@ int main(int argc, char *argv[])
     }
 }
 
+/*---- Tabla de Símbolos ----*/
+
 int insertarTS(const char *nombre,const char *tipo, const char* valString, int valInt, double valDouble)
 {
     t_simbolo *tabla = tablaTS.primero;
@@ -517,7 +520,6 @@ int insertarTS(const char *nombre,const char *tipo, const char* valString, int v
 
     return 0;
 }
-
 
 t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble)
 {
@@ -633,12 +635,15 @@ void crearTablaTS()
 t_simbolo * getLexema(const char *valor){
     t_simbolo *lexema;
     t_simbolo *tablaSimbolos = tablaTS.primero;
+
+    char nombreLimpio[32];
+    limpiarString(nombreLimpio, valor);
     char nombreCTE[32] = "_";
-    strcat(nombreCTE, valor);
+    strcat(nombreCTE, nombreLimpio);
     int esID, esCTE;
 
-    while(tablaSimbolos){   
-        esID = strcmp(tablaSimbolos->data.nombre, valor);
+    while(tablaSimbolos){  
+        esID = strcmp(tablaSimbolos->data.nombre, nombreLimpio);
         esCTE = strcmp(tablaSimbolos->data.nombre, nombreCTE);
         if(esID == 0 || esCTE == 0){
             lexema = tablaSimbolos;
@@ -694,6 +699,26 @@ int esNumero(const char* id,char* error)
     sprintf(error, "%s%s%s", "Error: no se declaro la variable '", id, "'");
     return 0;
 }
+
+/*    Funciones extras    */
+
+char* limpiarString(char* dest, const char* cad)
+{
+    //Sacarle las comillas a cad
+    int i, longitud, j=0;
+    longitud = strlen(cad);
+    for(i=0; i<longitud; i++)
+    {
+        if(cad[i] != '"')
+        {
+            dest[j] = cad[i];
+            j++;
+        }
+    }
+    dest[j] = '\0';
+    return dest;
+}
+
 
 /*------ Funciones Polaca ------*/
 
@@ -794,33 +819,28 @@ void notCondicion(int cant) //aca le pasamos por parametro el delta correspondie
     }
 }
 
+/*    Funciones extras    */
+
 void calcularFactorial(char * var, char * res)
 {	
-	char vecVarFact [] = "_";
-	char vecResFact [] = "_";
-	strcat(vecVarFact,var);
-
-	insertarTS(vecVarFact, "INT", "", 0, 0);
-	
-    insertarTS("_aux", "INT", "", 0, 0);
-
-	strcat(vecResFact,res);
-
-    insertarTS(vecResFact, "INT", "", 0, 0);
+	insertarTS(var, "INT", "", 0, 0);
+    insertarTS("@aux", "INT", "", 0, 0);
+    insertarTS(res, "INT", "", 0, 0);
 
     insertarPolaca("="); insertarPolaca(var); 
-    insertarPolaca(var); insertarPolaca("="); insertarPolaca("aux");
+    insertarPolaca(var); insertarPolaca("="); insertarPolaca("@aux");
     insertarPolaca(var); insertarPolaca("=");  insertarPolaca(res); 
     
     insertarPolaca("ET"); posActual--; guardarPos(); 
-    insertarPolaca("aux"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
+    insertarPolaca("@aux"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
     
-    insertarPolaca(res); insertarPolaca("aux"); insertarPolacaInt(1);
+    insertarPolaca(res); insertarPolaca("@aux"); insertarPolacaInt(1);
     insertarPolaca("-"); insertarPolaca("*"); insertarPolaca("="); insertarPolaca(res);
-    insertarPolaca("aux"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("="); insertarPolaca("aux");
+    insertarPolaca("@aux"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("="); insertarPolaca("@aux");
     
     insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); insertarPolacaInt(pedirPos());
 }
+
 
 /* --- Funciones para Assembler --- */
 
@@ -859,17 +879,10 @@ void generarAssembler(){
             }
             else{
                 fprintf(archAssembler, "displayFloat %s,2\n\n", lexema->data.nombre);
-            } 
+            }
         }
         else if(esAsignacion(vecPolaca[i])){
-            /*
-            1. Saltearme el = para poder leer la variable
-            2. Grabar la asignacion en el archivo final
-            3. Avanzar la polaca para saltearme la variable que acabo de usar
-            */          
-            //Entonces, me salteo el = en la polaca
             i++;
-            //grabo en el archivo la instruccion con la variable
             fprintf(archAssembler, "fstp %s\n\n", vecPolaca[i]);          
         }
         else if(esOperacion(vecPolaca[i])){
