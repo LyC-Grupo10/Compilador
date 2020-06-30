@@ -86,7 +86,7 @@ void apilarValor( char * str );
 bool esComparacion( char * str );
 bool esSalto( char * str );
 bool esGet( char * str );
-bool esDisplay( char * str );
+bool esDisplay(const char * str);
 bool esAsignacion( char * str );
 bool esOperacion(const char *);
 char * getOperacion(const char *);
@@ -232,23 +232,22 @@ sentencia:
             ;
 
 salida:
-        DISPLAY CONST_STR PUNTOYCOMA { 
+        DISPLAY CONST_STR PUNTOYCOMA {                                     
                                         strcpy(vecAux, $2);
                                         strtok(vecAux," ;\n");
-                                        insertarPolaca(vecAux);
                                         insertarPolaca("DISPLAY");
-
-                                    }
+                                        insertarPolaca(vecAux);
+                                     }
         | DISPLAY ID PUNTOYCOMA {
-                                    char error[50];
+                                    char error[50];                                   
                                     strcpy(vecAux, $2);
                                     punt = strtok(vecAux," ;\n");
                                     if(!esNumero(punt, error)) {
                                         sprintf(mensajes, "%s", error);
                                         yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                                     }
-                                    insertarPolaca(vecAux);
                                     insertarPolaca("DISPLAY");
+                                    insertarPolaca(vecAux);                                 
                                 }
         ;
 
@@ -837,7 +836,6 @@ void generarAssembler(){
     for(i=0; i<posActual; i++){
 	    if(esValor(vecPolaca[i])){
             t_simbolo *lexema = getLexema(vecPolaca[i]);
-            //Seguramente haya que indicar, según el caso, un parámetro extra para fld
             fprintf(archAssembler, "fld %s\n", lexema->data.nombre);
         }
         else if(esComparacion(vecPolaca[i]))
@@ -852,9 +850,16 @@ void generarAssembler(){
         {
             fprintf(archAssembler,"GET en assembler\n");
         }
-        else if(esDisplay( vecPolaca[i]))
-        {
-            fprintf(archAssembler,"DISPLAY en assembler\n");
+        else if(esDisplay(vecPolaca[i])){
+            i++;
+            t_simbolo *lexema = getLexema(vecPolaca[i]);
+
+            if(strcmp(lexema->data.tipo, "CONST_STR") == 0){
+                fprintf(archAssembler, "displayString \"Hola\"\n\n");
+            }
+            else{
+                fprintf(archAssembler, "displayFloat %s,2\n\n", lexema->data.nombre);
+            } 
         }
         else if(esAsignacion(vecPolaca[i])){
             /*
@@ -966,11 +971,12 @@ bool esGet(char * str)
     int aux = strcmp(str, "GET");
     return aux == 0;
 }
-bool esDisplay(char * str)
-{
+
+bool esDisplay(const char * str){
     int aux = strcmp(str, "DISPLAY");
     return aux == 0;
 }
+
 bool esAsignacion(char * str)
 {
     int aux = strcmp(str, "=");

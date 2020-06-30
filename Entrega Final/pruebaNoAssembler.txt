@@ -1,0 +1,47 @@
+DEFVAR
+int: a; b; c; i; x
+string: z
+ENDDEF
+
+BEGINP
+if(a > 5 and c <= 10){
+ 	c = 5;
+}
+else {
+	if(a < 10 or a == 3){
+		c = 10;
+	}
+	else
+	{
+		display "else";
+	}
+	i = 7;
+}
+
+while(a > 1 or b > 1){
+	while(c > 1){
+		x = 1;
+		if(c<10)
+		{
+			display "menor";
+		}
+		else
+		{
+			display "mayor";
+		}
+	}
+}
+
+if(between(i, [3; (c*2) + a])){
+	display "Test";
+}
+
+display a;
+
+get z;
+
+a = fact(a+b);
+
+c = comb(a,b);
+
+ENDP
