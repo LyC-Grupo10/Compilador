@@ -875,7 +875,7 @@ void generarAssembler(){
             t_simbolo *lexema = getLexema(vecPolaca[i]);
 
             if(strcmp(lexema->data.tipo, "CONST_STR") == 0){
-                fprintf(archAssembler, "displayString \"Hola\"\n\n");
+                fprintf(archAssembler, "displayString %s\n\n", lexema->data.nombre);
             }
             else{
                 fprintf(archAssembler, "displayFloat %s,2\n\n", lexema->data.nombre);
