@@ -260,8 +260,9 @@ entrada:
                                 sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                                 yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                             }
+                            insertarPolaca("GET"); //cambie el orden de estos dos, espero sepan perdonar
                             insertarPolaca(vecAux);
-                            insertarPolaca("GET");
+
                         }
         ;        
 
@@ -868,7 +869,22 @@ void generarAssembler(){
         }
         else if(esGet(vecPolaca[i]))
         {
-            fprintf(archAssembler,"GET en assembler\n");
+            i++;
+            t_simbolo *lexema = getLexema(vecPolaca[i]);
+            //fprintf(archAssembler, "esta variable es: %s\t%s\n\n", lexema->data.nombre, lexema->data.tipo);
+            if(strcmp(lexema->data.tipo, "CONST_REAL") == 0)
+            {
+                fprintf(archAssembler, "GetFloat %s\n\n", lexema->data.nombre);
+            }
+            else if( strcmp(lexema->data.tipo, "INT") == 0 )
+            {
+                fprintf(archAssembler, "GetInteger %s\n\n", lexema->data.nombre);
+            }
+            else
+            {
+                fprintf(archAssembler, "getString %s\n\n", lexema->data.nombre);
+            }
+
         }
         else if(esDisplay(vecPolaca[i])){
             i++;
@@ -877,8 +893,9 @@ void generarAssembler(){
             if(strcmp(lexema->data.tipo, "CONST_STR") == 0){
                 fprintf(archAssembler, "displayString %s\n\n", lexema->data.nombre);
             }
-            else{
-                fprintf(archAssembler, "displayFloat %s,2\n\n", lexema->data.nombre);
+            else
+            {
+                fprintf(archAssembler, "DisplayFloat %s,2\n\n", lexema->data.nombre);
             }
         }
         else if(esAsignacion(vecPolaca[i])){
@@ -907,6 +924,8 @@ void crearSeccionData(FILE *archAssembler){
     t_simbolo *tablaSimbolos = tablaTS.primero;
 
     fprintf(archAssembler, "\n%s\n\n", ".DATA");
+
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "_get", "db", "?", "; Variable string"); //hay que sacarlo
 
     while(tablaSimbolos){
         aux = tablaSimbolos;
