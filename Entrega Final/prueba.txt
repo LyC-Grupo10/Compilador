@@ -9,21 +9,23 @@ c = 3;
 
 a = b + c * 2;
 
-display a;
-
 if (a >= 7 or a == 5){
-    if(a < 10 or a == 7){
-        display "true";
-    }
+    display "true";
 }
 else{
     if (a < 1 and a == 0){
-        if(a > 1 and a != 2){
-            display "true2";
-        }
+        display "true2";
     }   
     display "false";
 }
+
+while(a < 10){
+    display a;
+    display "a es menor a diez";
+    a = a + 1;
+}
+
+display a;
 
 display "end";
 
