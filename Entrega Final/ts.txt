@@ -9,8 +9,7 @@ _7                            CONST_INT                     7                   
 _5                            CONST_INT                     5                             1
 S_true_1                      CONST_STR                     "true"                        4
 _0                            CONST_INT                     0                             1
-S_true2_2                     CONST_STR                     "true2"                       5
-S_false_3                     CONST_STR                     "false"                       5
+S_false_2                     CONST_STR                     "false"                       5
 _10                           CONST_INT                     10                            2
-S_a_es_menor_a_diez_4         CONST_STR                     "a es menor a diez"           17
-S_end_5                       CONST_STR                     "end"                         3
+S_a_es_menor_a_diez_3         CONST_STR                     "a es menor a diez"           17
+S_end_4                       CONST_STR                     "end"                         3

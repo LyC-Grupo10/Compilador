@@ -560,6 +560,13 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
         {
             return 1;
         }
+        else if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
+        {
+            if(strcmp(tabla->data.valor.valor_str, valString) == 0)
+            {
+                return 1;
+            }
+        }
         
         if(tabla->next == NULL)
         {
