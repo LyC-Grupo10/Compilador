@@ -4,3 +4,5 @@ tlink /3 Final.obj numbers.obj /v /s /m
 pause
 Final.exe
 pause
+del Final.obj
+del Final.lst
