@@ -88,12 +88,12 @@ int vectorEtiquetas[50], topeVectorEtiquetas = -1;
 void generarAssembler();
 void guardarPosicionDeEtiqueta(const char *);
 bool esPosicionDeEtiqueta(int);
+bool esEtiquetaWhile(const char *);
 void crearHeader(FILE *);
 void crearSeccionData(FILE *);
 void crearSeccionCode(FILE *);
 void crearFooter(FILE *);
-bool esValor(const char * str);
-void apilarValor( char * str );
+bool esValor(const char *);
 bool esComparacion(const char *);
 bool esSalto(const char *);
 char * getSalto(const char *);
@@ -1054,7 +1054,7 @@ void calcularFactorial(char * var, char * res)
     insertarPolaca(var); insertarPolaca("=");  insertarPolaca(res); 
     
     insertarPolaca("ET"); posActual--; guardarPos(); 
-    insertarPolaca("@auxFact"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
+    insertarPolaca("@auxFact"); insertarPolaca("CMP"); insertarPolacaInt(2); insertarPolaca("BLE"); guardarPos();
     
     insertarPolaca(res); insertarPolaca("@auxFact"); insertarPolacaInt(1);
     insertarPolaca("-"); insertarPolaca("*"); insertarPolaca("="); insertarPolaca(res);
@@ -1073,11 +1073,10 @@ void generarAssembler(){
     crearSeccionData(archAssembler);
     crearSeccionCode(archAssembler);
 
-    //Código propiamente dicho   
     int i;
     for(i=0; i<posActual; i++){
 
-        if(esPosicionDeEtiqueta(i)){
+        if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vecPolaca[i])){
             fprintf(archAssembler, "branch%d:\n\n", i);
         }        
 
@@ -1131,7 +1130,6 @@ void generarAssembler(){
             fprintf(archAssembler, "%s\n", getOperacion(vecPolaca[i]));
         }
 	}      
-    //Fin código propiamente dicho
 
     crearFooter(archAssembler);
     fclose(archAssembler);
@@ -1151,6 +1149,10 @@ bool esPosicionDeEtiqueta(int posicion){
         }
     }
     return false;
+}
+
+bool esEtiquetaWhile(const char *str){
+    return strcmp(str, "ET") == 0;
 }
 
 void crearHeader(FILE *archAssembler){
@@ -1214,11 +1216,6 @@ bool esValor(const char * str){
     //Si es valor, tiene que estar en la tabla de símbolos guiño guiño
     return existeID(str) == 1;
 } 
-
-void apilarValor(char * str)
-{
-    /*** aca tendria que guardar ese valor en una pila ***/
-}
 
 bool esComparacion(const char * str){
     int aux = strcmp(str, "CMP");

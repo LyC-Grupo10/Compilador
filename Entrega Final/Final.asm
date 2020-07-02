@@ -15,12 +15,13 @@ _3             dd             3.0            ; Constante int
 _2             dd             2.0            ; Constante int
 _7             dd             7.0            ; Constante int
 _5             dd             5.0            ; Constante int
-_10            dd             10.0           ; Constante int
 S_true_1                      db             "true", '$', 4 dup (?); Constante string
 _0             dd             0.0            ; Constante int
 S_true2_2                     db             "true2", '$', 5 dup (?); Constante string
 S_false_3                     db             "false", '$', 5 dup (?); Constante string
-S_end_4                       db             "end", '$', 3 dup (?); Constante string
+_10            dd             10.0           ; Constante int
+S_a_es_menor_a_diez_4         db             "a es menor a diez", '$', 17 dup (?); Constante string
+S_end_5                       db             "end", '$', 3 dup (?); Constante string
 @ifI           dd             ?              ; Variable para condición izquierda
 @ifD           dd             ?              ; Variable para condición derecha
 
@@ -45,8 +46,6 @@ fmul
 fadd
 fstp a
 
-displayFloat a,2
-NEWLINE
 fld a
 fstp @ifI
 
@@ -59,7 +58,7 @@ fxch
 fcom
 fstsw AX
 sahf
-jae branch25
+jae branch23
 
 fld a
 fstp @ifI
@@ -73,47 +72,15 @@ fxch
 fcom
 fstsw AX
 sahf
-jne branch39
+jne branch27
 
-branch25:
-
-fld a
-fstp @ifI
-
-fld _10
-fstp @ifD
-
-fld @ifI
-fld @ifD
-fxch
-fcom
-fstsw AX
-sahf
-jb branch35
-
-fld a
-fstp @ifI
-
-fld _7
-fstp @ifD
-
-fld @ifI
-fld @ifD
-fxch
-fcom
-fstsw AX
-sahf
-jne branch37
-
-branch35:
+branch23:
 
 displayString S_true_1
 NEWLINE
-branch37:
+jmp branch41
 
-jmp branch63
-
-branch39:
+branch27:
 
 fld a
 fstp @ifI
@@ -127,7 +94,7 @@ fxch
 fcom
 fstsw AX
 sahf
-jae branch61
+jae branch39
 
 fld a
 fstp @ifI
@@ -141,45 +108,46 @@ fxch
 fcom
 fstsw AX
 sahf
-jne branch61
-
-fld a
-fstp @ifI
-
-fld _1
-fstp @ifD
-
-fld @ifI
-fld @ifD
-fxch
-fcom
-fstsw AX
-sahf
-jbe branch61
-
-fld a
-fstp @ifI
-
-fld _2
-fstp @ifD
-
-fld @ifI
-fld @ifD
-fxch
-fcom
-fstsw AX
-sahf
-je branch61
+jne branch39
 
 displayString S_true2_2
 NEWLINE
-branch61:
+branch39:
 
 displayString S_false_3
 NEWLINE
-branch63:
+branch41:
 
-displayString S_end_4
+fld a
+fstp @ifI
+
+fld _10
+fstp @ifD
+
+fld @ifI
+fld @ifD
+fxch
+fcom
+fstsw AX
+sahf
+jae branch58
+
+displayFloat a,2
+NEWLINE
+displayString S_a_es_menor_a_diez_4
+NEWLINE
+fld a
+fld _1
+fadd
+fstp a
+
+jmp branch41
+
+branch58:
+
+displayFloat a,2
+NEWLINE
+displayString S_end_5
 NEWLINE
 
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución
