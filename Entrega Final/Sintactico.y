@@ -78,17 +78,19 @@ void notCondicion(int);
 void calcularFactorial(char *, char *);
 
 /* --- Assembler --- */
-char pilaAssembler[500][50];
-int topePilaAssembler=0;
+int vectorEtiquetas[50], topeVectorEtiquetas = -1;
 void generarAssembler();
+void guardarPosicionDeEtiqueta(const char *);
+bool esPosicionDeEtiqueta(int);
 void crearHeader(FILE *);
 void crearSeccionData(FILE *);
 void crearSeccionCode(FILE *);
 void crearFooter(FILE *);
 bool esValor(const char * str);
 void apilarValor( char * str );
-bool esComparacion( char * str );
-bool esSalto( char * str );
+bool esComparacion(const char *);
+bool esSalto(const char *);
+char * getSalto(const char *);
 bool esGet( char * str );
 bool esDisplay(const char * str);
 bool esAsignacion( char * str );
@@ -245,7 +247,7 @@ salida:
         | DISPLAY ID PUNTOYCOMA {
                                     char error[50];                                   
                                     strcpy(vecAux, $2);
-                                    punt = strtok(vecAux," ;\n"); //ver aca si hay que sacar este espacio
+                                    punt = strtok(vecAux," ;\n");
                                     if(!esNumero(punt, error)) {
                                         sprintf(mensajes, "%s", error);
                                         yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
@@ -263,7 +265,7 @@ entrada:
                                 sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                                 yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                             }
-                            insertarPolaca("GET"); //cambie el orden de estos dos, espero sepan perdonar
+                            insertarPolaca("GET");
                             insertarPolaca(vecAux);
                         }
         ;        
@@ -329,17 +331,17 @@ condicion:
 
 //Acá vemos si es un or, en tal caso, se setea a la comparación anterior la celda a la que tiene que saltar para ir al bloque true.
 comparacion:
-            expresion COMP_BEQ expresion { insertarPolaca("CMP"); insertarPolaca("BNE");
+            expresion COMP_BEQ { insertarPolaca("CMP"); } expresion { insertarPolaca("BNE");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BLE expresion { insertarPolaca("CMP"); insertarPolaca("BGT");
+            | expresion COMP_BLE { insertarPolaca("CMP"); } expresion { insertarPolaca("BGT");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BGE expresion { insertarPolaca("CMP"); insertarPolaca("BLT");
+            | expresion COMP_BGE { insertarPolaca("CMP"); } expresion { insertarPolaca("BLT");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BGT expresion { insertarPolaca("CMP"); insertarPolaca("BLE");
+            | expresion COMP_BGT { insertarPolaca("CMP"); } expresion { insertarPolaca("BLE");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BLT expresion { insertarPolaca("CMP"); insertarPolaca("BGE");
+            | expresion COMP_BLT { insertarPolaca("CMP"); } expresion { insertarPolaca("BGE");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BNE expresion { insertarPolaca("CMP"); insertarPolaca("BEQ");
+            | expresion COMP_BNE { insertarPolaca("CMP"); } expresion { insertarPolaca("BEQ");
                                             if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
             | between {delta += 2;} //aca suma de a dos porque between tiene dos comparaciones
             ;
@@ -827,7 +829,6 @@ char* reemplazarString(char* dest, const char* cad)
     return dest;
 }
 
-
 /*------ Funciones Polaca ------*/
 
 char* insertarPolaca(char * cad){
@@ -962,23 +963,33 @@ void generarAssembler(){
     //Código propiamente dicho   
     int i;
     for(i=0; i<posActual; i++){
+
+        if(esPosicionDeEtiqueta(i)){
+            fprintf(archAssembler, "branch%d:\n\n", i);
+        }        
+
 	    if(esValor(vecPolaca[i])){
             t_simbolo *lexema = getLexema(vecPolaca[i]);
             fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
         }
-        else if(esComparacion(vecPolaca[i]))
-        {
-            
+        else if(esComparacion(vecPolaca[i])){
+            fprintf(archAssembler, "fstp @ifI\n\n");
         }
-        else if(esSalto(vecPolaca[i]))
-        {
-
+        else if(esSalto(vecPolaca[i])){
+            char *tipoSalto = getSalto(vecPolaca[i]);
+            if(strcmp(tipoSalto, "jmp") != 0){
+                fprintf(archAssembler, "fstp @ifD\n\n");
+                fprintf(archAssembler, "fld @ifI\nfld @ifD\n");
+                fprintf(archAssembler, "fxch\nfcom\nfstsw AX\nsahf\n");
+            }
+            i++;
+            fprintf(archAssembler, "%s branch%s\n\n", tipoSalto, vecPolaca[i]);
+            guardarPosicionDeEtiqueta(vecPolaca[i]);
         }
-        else if(esGet(vecPolaca[i]))
-        {
+        else if(esGet(vecPolaca[i])){
             i++;
             t_simbolo *lexema = getLexema(vecPolaca[i]);
-            //fprintf(archAssembler, "esta variable es: %s\t%s\n\n", lexema->data.nombre, lexema->data.tipo);
+
             if(strcmp(lexema->data.tipo, "CONST_REAL") == 0 || strcmp(lexema->data.tipo, "INT") == 0)
             {
                 fprintf(archAssembler, "GetFloat %s\nNEWLINE\n", lexema->data.nombreASM);
@@ -987,7 +998,6 @@ void generarAssembler(){
             {
                 fprintf(archAssembler, "getString %s\nNEWLINE\n", lexema->data.nombreASM);
             }
-
         }
         else if(esDisplay(vecPolaca[i])){
             i++;
@@ -1014,6 +1024,22 @@ void generarAssembler(){
     fclose(archAssembler);
 }
 
+//Podríamos verificar de no introducir duplicados, pero creo que al cohete.
+void guardarPosicionDeEtiqueta(const char *posicion){
+	topeVectorEtiquetas++;
+	vectorEtiquetas[topeVectorEtiquetas] = atoi(posicion);
+}
+
+bool esPosicionDeEtiqueta(int posicion){
+    int i;
+    for(i = 0; i <= topeVectorEtiquetas; i++){
+        if(posicion == vectorEtiquetas[i]){
+            return true;
+        }
+    }
+    return false;
+}
+
 void crearHeader(FILE *archAssembler){
     fprintf(archAssembler, "%s\n%s\n\n", "include number.asm", "include macros2.asm");
     fprintf(archAssembler, "%-30s%-30s\n", ".MODEL LARGE", "; Modelo de memoria");
@@ -1025,7 +1051,7 @@ void crearSeccionData(FILE *archAssembler){
     t_simbolo *aux;
     t_simbolo *tablaSimbolos = tablaTS.primero;
 
-    fprintf(archAssembler, "\n%s\n\n", ".DATA");
+    fprintf(archAssembler, "%s\n\n", ".DATA");
 
     while(tablaSimbolos){
         aux = tablaSimbolos;
@@ -1056,10 +1082,10 @@ void crearSeccionData(FILE *archAssembler){
             fprintf(archAssembler, "%-30s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", valor, "; Constante string");
         }
     }
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");
+    fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifD", "dd", "?", "; Variable para condición derecha");
 }
 
-/* Habría que ver si los registros deben ir en mayúscula o en minúscula
-   En caso de que puedan en ambas, los ponemos en mayúscula? */
 void crearSeccionCode(FILE *archAssembler){
     fprintf(archAssembler, "\n%s\n\n%s\n\n", ".CODE", "inicio:");
     fprintf(archAssembler, "%-30s%-30s\n", "mov AX,@DATA", "; Inicializa el segmento de datos");
@@ -1080,17 +1106,63 @@ void apilarValor(char * str)
 {
     /*** aca tendria que guardar ese valor en una pila ***/
 }
-bool esComparacion(char * str)
-{
+
+bool esComparacion(const char * str){
     int aux = strcmp(str, "CMP");
     return aux == 0;
 }
-bool esSalto(char * str)
-{
-    //aca deberiamos poner todos los saltos o se refiere al BI?
-    //los Bxx se contempan junto al CMP? como por ejemplo, pasa en la asignación que se mueve acorde a lo que usa
+
+//La última comparación no es obligatoria, pero es para no perder de vista todos los saltos.
+bool esSalto(const char * str){
+    if(strcmp(str, "BNE") == 0){
+       return true; 
+    }
+    else if(strcmp(str, "BGT") == 0){
+        return true;
+    }
+    else if(strcmp(str, "BLT") == 0){
+        return true;
+    }
+    else if(strcmp(str, "BLE") == 0){
+       return true; 
+    }
+    else if(strcmp(str, "BGE") == 0){
+        return true;
+    }
+    else if(strcmp(str, "BEQ") == 0){
+        return true;
+    }
+    else if(strcmp(str, "BI") == 0){
+        return true;
+    }
     return false;
 }
+
+//La última comparación no es obligatoria, pero es más fácil de ver a qué salto corresponde.
+char * getSalto(const char * salto){
+    if(strcmp(salto, "BNE") == 0){
+       return "jne"; 
+    }
+    else if(strcmp(salto, "BGT") == 0){
+        return "ja";
+    }
+    else if(strcmp(salto, "BLT") == 0){
+        return "jb";
+    }
+    else if(strcmp(salto, "BLE") == 0){
+       return "jbe"; 
+    }
+    else if(strcmp(salto, "BGE") == 0){
+        return "jae";
+    }
+    else if(strcmp(salto, "BEQ") == 0){
+        return "je";
+    }
+    else if(strcmp(salto, "BI") == 0){
+        return "jmp";
+    }
+}
+
 bool esGet(char * str)
 {
     int aux = strcmp(str, "GET");

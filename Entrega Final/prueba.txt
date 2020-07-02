@@ -1,16 +1,30 @@
 DEFVAR
-int: a; b; c; i; x
-string: z
+int: a; b; c
 ENDDEF
 
 BEGINP
 
-b = 4;
-c = 5;
+b = 1;
+c = 3;
 
-a = b/2 + c;
+a = b + c * 2;
 
 display a;
-display "HolaGrupo10";
+
+if (a >= 7 or a == 5){
+    if(a < 10 or a == 7){
+        display "true";
+    }
+}
+else{
+    if (a < 1 and a == 0){
+        if(a > 1 and a != 2){
+            display "true2";
+        }
+    }   
+    display "false";
+}
+
+display "end";
 
 ENDP
