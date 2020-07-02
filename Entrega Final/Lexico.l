@@ -115,28 +115,22 @@ LL_C            ["}"]
                     char aux[longitud];
                     strcpy(aux, yylval.tipo_str);
                     char cadena[longitud];
-                    int i,j=0;
-                    for(i=0;i<longitud;i++)
-                    {
-                        if(aux[i] != '"')
-                        {
-                            cadena[j] = aux[i];
-                            j++;
-                        }
-                    }
-                    cadena[j] = '\0';
+                    limpiarString(cadena, aux);
+
                     insertarTS(cadena, "CONST_STR", yylval.tipo_str, 0, 0);
                     return CONST_STR;
                 }
 {CONST_REAL}    {
                     yylval.tipo_double = atof(yytext);
                     validarFloat(yylval.tipo_double);
+
                     insertarTS(yytext, "CONST_REAL", "", 0, yylval.tipo_double);
                     return CONST_REAL;
                 }
 {CONST_INT}     {
                     yylval.tipo_int = atoi(yytext);
                     validarInt(yylval.tipo_int);
+
                     insertarTS(yytext, "CONST_INT", "", yylval.tipo_int, 0);
                     return CONST_INT;
                 }
