@@ -115,16 +115,7 @@ LL_C            ["}"]
                     char aux[longitud];
                     strcpy(aux, yylval.tipo_str);
                     char cadena[longitud];
-                    int i,j=0;
-                    for(i=0;i<longitud;i++)
-                    {
-                        if(aux[i] != '"')
-                        {
-                            cadena[j] = aux[i];
-                            j++;
-                        }
-                    }
-                    cadena[j] = '\0';
+                    limpiarString(cadena, aux);
                     insertarTS(cadena, "CONST_STR", yylval.tipo_str, 0, 0);
                     return CONST_STR;
                 }

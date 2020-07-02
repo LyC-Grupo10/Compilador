@@ -22,6 +22,7 @@ typedef struct
                 char *valor_str;
         }valor;
         int longitud;
+        char *nombreASM;
 }t_data;
 
 typedef struct s_simbolo
@@ -42,10 +43,12 @@ t_data* crearDatos(const char*, const char*, const char*, int, double);
 void guardarTS();
 t_simbolo * getLexema(const char *);
 char* limpiarString(char*, const char*);
+char* reemplazarChar(char*, const char*, const char, const char);
+char* reemplazarString(char*, const char*);
 t_tabla tablaTS;
 
 char idvec[32][50];
-int cantid = 0, i=0;
+int cantid = 0, i=0, contadorString=0;
 char vecAux[20];
 char* punt;
 
@@ -235,14 +238,14 @@ sentencia:
 salida:
         DISPLAY CONST_STR PUNTOYCOMA {                                     
                                         strcpy(vecAux, $2);
-                                        strtok(vecAux," ;\n");
+                                        strtok(vecAux,";\n");
                                         insertarPolaca("DISPLAY");
                                         insertarPolaca(vecAux);
                                      }
         | DISPLAY ID PUNTOYCOMA {
                                     char error[50];                                   
                                     strcpy(vecAux, $2);
-                                    punt = strtok(vecAux," ;\n");
+                                    punt = strtok(vecAux," ;\n"); //ver aca si hay que sacar este espacio
                                     if(!esNumero(punt, error)) {
                                         sprintf(mensajes, "%s", error);
                                         yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
@@ -269,7 +272,7 @@ asignacion:
             ID OP_ASIG expresion PUNTOYCOMA {
                                                 strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
                                                 punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
-                                                if(!existeID(punt)) /*No existe: entonces no esta declarada*/
+                                                if(!existeID(punt))
                                                 {
                                                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                                                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
@@ -357,7 +360,7 @@ factor:
         ID {
                 strcpy(vecAux, $1);
                 punt = strtok(vecAux," +-*/[](){}:=,\n");
-                if(!existeID(punt)) /*No esta declarada*/
+                if(!existeID(punt))
                 {
                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
@@ -392,8 +395,8 @@ combinatorio:
 
 factorial:
         FACT PAR_A expresionNumerica PAR_C {           
-            calcularFactorial("@var","@res");
-            insertarPolaca("@res");
+            calcularFactorial("@varFact","@resFact");
+            insertarPolaca("@resFact");
         }
         ;
 
@@ -433,7 +436,7 @@ factorNumerico:
                 char error[50];
                 strcpy(vecAux, $1);
                 punt = strtok(vecAux," +-*/[](){}:=,\n");
-                if(!esNumero(punt,error)) /*No existe: entonces no esta declarada --> error*/
+                if(!esNumero(punt,error))
                 {
                     sprintf(mensajes, "%s", error);
                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
@@ -535,32 +538,54 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
     data->tipo = (char*)malloc(sizeof(char) * (strlen(tipo) + 1));
     strcpy(data->tipo, tipo);
 
-    //Es una variable
     if(strcmp(tipo, "STRING")==0 || strcmp(tipo, "INT")==0 || strcmp(tipo, "FLOAT")==0)
     {
-        //al nombre lo dejo aca porque no lleva _
         data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
         strcpy(data->nombre, nombre);
+        data->nombreASM = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+        strcpy(data->nombreASM, nombre);
         return data;
     }
     else
     {   //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
         if(strcmp(tipo, "CONST_STR") == 0)
         {
-            data->valor.valor_str = (char*)malloc(sizeof(char) * strlen(valString) +1);
-            data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
-            strcat(full, nombre);
-            strcpy(data->nombre, full);    
+            contadorString++;
+            
+            data->valor.valor_str = (char*)malloc(sizeof(char) * strlen(valString));
             strcpy(data->valor.valor_str, valString);
+            //data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
+            //strcat(full, nombre);
+            //strcpy(data->nombre, full);    
+
+            //Esto es para el ASM
+            char auxString[32];
+            strcpy(full, ""); 
+            strcpy(full, "S_");  // "S_"
+            reemplazarString(auxString, nombre); //aca le saca los espacios y char especiales al nombre
+            strcat(full, auxString); // "S_<nombre>"  
+
+            char numero[10];
+            sprintf(numero, "_%d", contadorString);
+            strcat(full, numero); // "S_<nombre>_#"
+
+            data->nombre = (char*)malloc(sizeof(char) * (strlen(full)));
+            data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full)));
+            strcpy(data->nombre, full);
+            strcpy(data->nombreASM, data->nombre);
         }
         if(strcmp(tipo, "CONST_REAL") == 0)
         {
+            char dest[32];
             sprintf(aux, "%g", valDouble);
             strcat(full, aux);
             data->nombre = (char*)malloc(sizeof(char) * strlen(full));
-
             strcpy(data->nombre, full);
             data->valor.valor_double = valDouble;
+    
+            reemplazarChar(dest, full, '.', '_');
+            data->nombreASM = (char*)malloc(sizeof(char) * (strlen(dest)));
+            strcpy(data->nombreASM, dest);
         }
         if(strcmp(tipo, "CONST_INT") == 0)
         {
@@ -569,6 +594,8 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             data->nombre = (char*)malloc(sizeof(char) * strlen(full));
             strcpy(data->nombre, full);
             data->valor.valor_int = valInt;
+            data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full)));
+            strcpy(data->nombreASM, full);
         }
         return data;
     }
@@ -640,12 +667,28 @@ t_simbolo * getLexema(const char *valor){
     limpiarString(nombreLimpio, valor);
     char nombreCTE[32] = "_";
     strcat(nombreCTE, nombreLimpio);
-    int esID, esCTE;
+    int esID, esCTE, esASM, esValor =-1;
+    char valorFloat[32];
 
     while(tablaSimbolos){  
         esID = strcmp(tablaSimbolos->data.nombre, nombreLimpio);
         esCTE = strcmp(tablaSimbolos->data.nombre, nombreCTE);
-        if(esID == 0 || esCTE == 0){
+        esASM = strcmp(tablaSimbolos->data.nombreASM, valor);
+
+        if(strcmp(tablaSimbolos->data.tipo, "CONST_REAL") == 0)
+        {
+            sprintf(valorFloat, "%.10f", tablaSimbolos->data.valor.valor_double);
+            esValor = strcmp(valorFloat, valor);
+            printf("Comparo Busqueda <%s> con Lexema <%s> y esValor = <%d>\n", valor, valorFloat, esValor);
+        }
+        else if(strcmp(tablaSimbolos->data.tipo, "CONST_STR") == 0)
+        {
+            esValor = strcmp(valor, tablaSimbolos->data.valor.valor_str);
+            printf("Comparo Busqueda <%s> con Lexema <%s> y esValor = <%d>\n", valor, tablaSimbolos->data.valor.valor_str, esValor);
+        }
+
+
+        if(esID == 0 || esCTE == 0 || esASM==0 || esValor == 0){
             lexema = tablaSimbolos;
             return lexema;
         }
@@ -657,16 +700,30 @@ t_simbolo * getLexema(const char *valor){
 int existeID(const char* id)
 {
     t_simbolo *tabla = tablaTS.primero;
+    char valor[32];
     char nombreCTE[32] = "_";
     strcat(nombreCTE, id);
-    int b1 = 0;
-    int b2 = 0;
+    int b1, b2, b3, b4 = -1;
 
     while(tabla)
     {   
         b1 = strcmp(tabla->data.nombre, id);
         b2 = strcmp(tabla->data.nombre, nombreCTE);
-        if(b1 == 0 || b2 == 0){
+        b3 = strcmp(tabla->data.nombreASM, id);
+
+        if(strcmp(tabla->data.tipo, "CONST_REAL") == 0)
+        {
+            sprintf(valor, "%.10f", tabla->data.valor.valor_double);
+            b4 = strcmp(valor, id);
+            //printf("EXISTE ID: CONST REAL\nValor en TS: <%s> | Lo que busco: <%s> | b4 = <%d>\n", valor, id, b4);
+        }
+        else if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
+        {
+            b4 = strcmp(tabla->data.valor.valor_str, id);
+            //printf("EXISTE ID: CONST STR\nValor en TS: <%s> | Lo que busco: <%s> | b4 = <%d>\n", tabla->data.valor.valor_str, id, b4);
+        }
+        
+        if(b1 == 0 || b2 == 0 || b3 == 0 || b4 == 0){
             return 1;
         }
         tabla = tabla->next;
@@ -716,6 +773,46 @@ char* limpiarString(char* dest, const char* cad)
         }
     }
     dest[j] = '\0';
+    return dest;
+}
+
+char* reemplazarChar(char* dest, const char* cad, const char viejo, const char nuevo)
+{
+    int i, longitud;
+    longitud = strlen(cad);
+
+    for(i=0; i<longitud; i++)
+    {
+        if(cad[i] == viejo)
+        {
+            dest[i] = nuevo;
+        }
+        else
+        {
+            dest[i] = cad[i];
+        }
+    }
+    dest[i] = '\0';
+    return dest;
+}
+
+char* reemplazarString(char* dest, const char* cad)
+{
+    int i, longitud;
+    longitud = strlen(cad);
+
+    for(i=0; i<longitud; i++)
+    {
+        if((cad[i] >= 'a' && cad[i] <= 'z') || (cad[i] >='A' && cad[i] <= 'Z') || (cad[i] >= '0' && cad[i] <= '9'))
+        {
+            dest[i] = cad[i];
+        }
+        else
+        {
+            dest[i] = '_';
+        }
+    }
+    dest[i] = '\0';
     return dest;
 }
 
@@ -824,19 +921,19 @@ void notCondicion(int cant) //aca le pasamos por parametro el delta correspondie
 void calcularFactorial(char * var, char * res)
 {	
 	insertarTS(var, "INT", "", 0, 0);
-    insertarTS("@aux", "INT", "", 0, 0);
+    insertarTS("@auxFact", "INT", "", 0, 0);
     insertarTS(res, "INT", "", 0, 0);
 
     insertarPolaca("="); insertarPolaca(var); 
-    insertarPolaca(var); insertarPolaca("="); insertarPolaca("@aux");
+    insertarPolaca(var); insertarPolaca("="); insertarPolaca("@auxFact");
     insertarPolaca(var); insertarPolaca("=");  insertarPolaca(res); 
     
     insertarPolaca("ET"); posActual--; guardarPos(); 
-    insertarPolaca("@aux"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
+    insertarPolaca("@auxFact"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
     
-    insertarPolaca(res); insertarPolaca("@aux"); insertarPolacaInt(1);
+    insertarPolaca(res); insertarPolaca("@auxFact"); insertarPolacaInt(1);
     insertarPolaca("-"); insertarPolaca("*"); insertarPolaca("="); insertarPolaca(res);
-    insertarPolaca("@aux"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("="); insertarPolaca("@aux");
+    insertarPolaca("@auxFact"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("="); insertarPolaca("@auxFact");
     
     insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); insertarPolacaInt(pedirPos());
 }
@@ -856,7 +953,7 @@ void generarAssembler(){
     for(i=0; i<posActual; i++){
 	    if(esValor(vecPolaca[i])){
             t_simbolo *lexema = getLexema(vecPolaca[i]);
-            fprintf(archAssembler, "fld %s\n", lexema->data.nombre);
+            fprintf(archAssembler, "fld %s\n", lexema->data.nombreASM);
         }
         else if(esComparacion(vecPolaca[i]))
         {
@@ -875,10 +972,10 @@ void generarAssembler(){
             t_simbolo *lexema = getLexema(vecPolaca[i]);
 
             if(strcmp(lexema->data.tipo, "CONST_STR") == 0){
-                fprintf(archAssembler, "displayString %s\n\n", lexema->data.nombre);
+                fprintf(archAssembler, "displayString %s\n\n", lexema->data.nombreASM);
             }
             else{
-                fprintf(archAssembler, "displayFloat %s,2\n\n", lexema->data.nombre);
+                fprintf(archAssembler, "displayFloat %s,2\n\n", lexema->data.nombreASM);
             }
         }
         else if(esAsignacion(vecPolaca[i])){
@@ -913,26 +1010,26 @@ void crearSeccionData(FILE *archAssembler){
         tablaSimbolos = tablaSimbolos->next;
         
         if(strcmp(aux->data.tipo, "INT") == 0){
-            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", "?", "; Variable int");
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable int");
         }
         else if(strcmp(aux->data.tipo, "FLOAT") == 0){
-            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", "?", "; Variable float");
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", "?", "; Variable float");
         }
         else if(strcmp(aux->data.tipo, "STRING") == 0){ 
-            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "db", "?", "; Variable string");
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", "?", "; Variable string");
         }
         else if(strcmp(aux->data.tipo, "CONST_INT") == 0){ 
             char valor[50];
             sprintf(valor, "%d", aux->data.valor.valor_int);
             strcat(valor, ".0");
-            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", valor, "; Constante int");
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor, "; Constante int");
         }
         else if(strcmp(aux->data.tipo, "CONST_REAL") == 0){ 
             char valor[50];
-            sprintf(valor, "%g", aux->data.valor.valor_double); //tenemos que ver si al nombre le sacamos el punto
-            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "dd", valor, "; Constante float");
+            sprintf(valor, "%g", aux->data.valor.valor_double);
+            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombreASM, "dd", valor, "; Constante float");
         }
-        else if(strcmp(aux->data.tipo, "CONST_STR") == 0){ //ver de "T_<string>" para el nombre
+        else if(strcmp(aux->data.tipo, "CONST_STR") == 0){
             char param[50];
             strcpy(param, aux->data.valor.valor_str);
             strcat(param, ", '$', ");
@@ -941,7 +1038,7 @@ void crearSeccionData(FILE *archAssembler){
             strcat(param, valor);
             strcat(param, " dup (?)");
 
-            fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", aux->data.nombre, "db", param, "; Constante string");
+            fprintf(archAssembler, "%-30s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", param, "; Constante string");
         }
     }
 }

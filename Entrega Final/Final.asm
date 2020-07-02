@@ -13,26 +13,18 @@ b              dd             ?              ; Variable int
 c              dd             ?              ; Variable int 
 i              dd             ?              ; Variable int 
 x              dd             ?              ; Variable int 
+f              dd             ?              ; Variable float
 z              db             ?              ; Variable string
+_4             dd             4.0            ; Constante int
 _5             dd             5.0            ; Constante int
-_10            dd             10.0           ; Constante int
-_3             dd             3.0            ; Constante int
-_else          db             "else", '$', 4 dup (?); Constante string
-_7             dd             7.0            ; Constante int
-_1             dd             1.0            ; Constante int
-_menor         db             "menor", '$', 5 dup (?); Constante string
-_mayor         db             "mayor", '$', 5 dup (?); Constante string
 _2             dd             2.0            ; Constante int
-_Test          db             "Test", '$', 4 dup (?); Constante string
-@var           dd             ?              ; Variable int 
-@aux           dd             ?              ; Variable int 
-@res           dd             ?              ; Variable int 
-@varN          dd             ?              ; Variable int 
-@resN          dd             ?              ; Variable int 
-@varM          dd             ?              ; Variable int 
-@resM          dd             ?              ; Variable int 
-@varNM         dd             ?              ; Variable int 
-@resNM         dd             ?              ; Variable int 
+_1             dd             1.0            ; Constante int
+_3             dd             3.0            ; Constante int
+S_otro_if_en_la_parte_true_1  db             "otro if en la parte true", '$', 24 dup (?); Constante string
+_10            dd             10.0           ; Constante int
+S_parte_else_del_if_2         db             "parte else del if", '$', 17 dup (?); Constante string
+_4_2           dd             4.2            ; Constante float
+S_between_true_3              db             "between true", '$', 12 dup (?); Constante string
 
 .CODE
 
@@ -42,163 +34,43 @@ mov AX,@DATA                  ; Inicializa el segmento de datos
 mov DS,AX                     
 mov ES,AX                     
 
-fld a
-fld _5
-fld c
-fld _10
+fld _4
+fstp b
+
 fld _5
 fstp c
 
-fld a
-fld _10
-fld a
-fld _3
-fld _10
-fstp c
-
-displayString "Hola"
-
-fld _7
-fstp i
-
-fld a
-fld _1
 fld b
-fld _1
-fld c
-fld _1
-fld _1
-fstp x
-
-fld c
-fld _10
-displayString "Hola"
-
-displayString "Hola"
-
-fld i
-fld _3
-fld i
-fld c
 fld _2
 fmul
-fld a
+fld _1
 fadd
-displayString "Hola"
-
-displayFloat a,2
-
-fld z
-GET en assembler
-fld a
 fld b
+fld c
 fadd
-fstp @var
+fld _3
+fdiv
+displayString S_otro_if_en_la_parte_true_1
 
-fld @var
-fstp @aux
-
-fld @var
-fstp @res
-
-fld @aux
+fld c
+fld _10
 fld _2
-fld @res
-fld @aux
-fld _1
-fsub
-fmul
-fstp @res
-
-fld @aux
-fld _1
-fsub
-fstp @aux
-
-fld @res
 fstp a
 
-fld a
-fstp @varN
+fld _1
+fstp a
+
+displayString S_parte_else_del_if_2
 
 fld b
-fstp @varM
-
-fstp @varN
-
-fld @varN
-fstp @aux
-
-fld @varN
-fstp @resN
-
-fld @aux
-fld _2
-fld @resN
-fld @aux
 fld _1
-fsub
+fld b
+fld a
+fld _10
 fmul
-fstp @resN
-
-fld @aux
-fld _1
+fld _4_2
 fsub
-fstp @aux
-
-fstp @varM
-
-fld @varM
-fstp @aux
-
-fld @varM
-fstp @resM
-
-fld @aux
-fld _2
-fld @resM
-fld @aux
-fld _1
-fsub
-fmul
-fstp @resM
-
-fld @aux
-fld _1
-fsub
-fstp @aux
-
-fld @varN
-fld @varM
-fsub
-fstp @varNM
-
-fld @varNM
-fstp @aux
-
-fld @varNM
-fstp @resNM
-
-fld @aux
-fld _2
-fld @resNM
-fld @aux
-fld _1
-fsub
-fmul
-fstp @resNM
-
-fld @aux
-fld _1
-fsub
-fstp @aux
-
-fld @resN
-fld @resM
-fdiv
-fld @resNM
-fdiv
-fstp c
+displayString S_between_true_3
 
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución
 int 21h
