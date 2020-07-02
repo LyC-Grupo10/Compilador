@@ -12,6 +12,5 @@ a = b/2 + c;
 
 display a;
 display "HolaGrupo10";
-get a;
-display a;
+
 ENDP
