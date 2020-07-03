@@ -82,6 +82,7 @@ int local = -1, delta = 0, hayOr = 0;
 int vecif[50];
 void notCondicion(int);
 void calcularFactorial(char *, char *);
+void calcularFactorialComb(char *, char *);
 
 /* --- Assembler --- */
 int vectorEtiquetas[50], topeVectorEtiquetas = -1;
@@ -451,16 +452,17 @@ factor:
 combinatorio:
         COMB PAR_A expresionNumerica { insertarPolaca("="); insertarPolaca("@varN"); } 
         COMA expresionNumerica 	{ insertarPolaca("="); insertarPolaca("@varM"); } PAR_C {
-            calcularFactorial("@varN","@resN");
-            calcularFactorial("@varM","@resM");
+            calcularFactorialComb("@varN","@resN");
+            calcularFactorialComb("@varM","@resM");
             insertarPolaca("@varN");
             insertarPolaca("@varM");
             insertarPolaca("-");
-            calcularFactorial("@varNM","@resNM");
+            insertarPolaca("="); insertarPolaca("@varNM");
+            calcularFactorialComb("@varNM","@resNM");
             insertarPolaca("@resN");
             insertarPolaca("@resM");
-            insertarPolaca("/");
             insertarPolaca("@resNM");
+            insertarPolaca("*");
             insertarPolaca("/");
         }
         ;
@@ -1060,6 +1062,33 @@ void calcularFactorial(char * var, char * res){
     insertarTS("2", "CONST_INT", "", 2, 0);
 
     insertarPolaca("="); insertarPolaca(var); 
+    insertarPolaca(var); insertarPolaca("="); insertarPolaca("@auxFact");
+    insertarPolaca(var); insertarPolaca("=");  insertarPolaca(res); 
+    
+    insertarPolaca("@auxFact"); insertarPolaca("CMP"); insertarPolacaInt(1); insertarPolaca("BGT"); guardarPos(); //Inicio del primer if
+
+    insertarPolacaInt(1); insertarPolaca("="); insertarPolaca(res);
+    insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); guardarPos();
+
+    insertarPolaca("ET"); posActual--; guardarPos(); //Inicio del while
+    insertarPolaca("@auxFact"); insertarPolaca("CMP"); insertarPolacaInt(2); insertarPolaca("BLE"); guardarPos(); //Inicio del segundo if
+    
+    insertarPolaca(res); insertarPolaca("@auxFact"); insertarPolacaInt(1);
+    insertarPolaca("-"); insertarPolaca("*"); insertarPolaca("="); insertarPolaca(res);
+    insertarPolaca("@auxFact"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("="); insertarPolaca("@auxFact");
+    
+    insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); //Fin del segundo if
+    insertarPolacaInt(pedirPos()); //Fin del while
+    insertarPolacaEnPosicion(pedirPos(), posActual); //Fin del primer if
+}
+
+void calcularFactorialComb(char * var, char * res){	
+	insertarTS(var, "INT", "", 0, 0);
+    insertarTS("@auxFact", "INT", "", 0, 0);
+    insertarTS(res, "INT", "", 0, 0);
+    insertarTS("1", "CONST_INT", "", 1, 0);    
+    insertarTS("2", "CONST_INT", "", 2, 0);
+ 
     insertarPolaca(var); insertarPolaca("="); insertarPolaca("@auxFact");
     insertarPolaca(var); insertarPolaca("=");  insertarPolaca(res); 
     
