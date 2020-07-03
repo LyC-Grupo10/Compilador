@@ -10,6 +10,7 @@ include macros2.asm
 a              dd             ?              ; Variable int 
 b              dd             ?              ; Variable int 
 c              dd             ?              ; Variable int 
+d              dd             ?              ; Variable int 
 _1             dd             1.0            ; Constante int
 _3             dd             3.0            ; Constante int
 _2             dd             2.0            ; Constante int
@@ -20,10 +21,11 @@ _0             dd             0.0            ; Constante int
 S_false_2                     db             "false", '$', 5 dup (?); Constante string
 _10            dd             10.0           ; Constante int
 S_a_es_menor_a_diez_3         db             "a es menor a diez", '$', 17 dup (?); Constante string
-S_end_4                       db             "end", '$', 3 dup (?); Constante string
 _30            dd             30.0           ; Constante int
-S_between_5                   db             "between", '$', 7 dup (?); Constante string
-_35            dd             35.0           ; Constante int
+S_between_4                   db             "between", '$', 7 dup (?); Constante string
+S_Ingrese_un_int_5            db             "Ingrese un int", '$', 14 dup (?); Constante string
+S_Int_que_usted_ingreso__6    db             "Int que usted ingreso:", '$', 22 dup (?); Constante string
+S_fin_del_programa_7          db             "fin del programa", '$', 16 dup (?); Constante string
 @ifI           dd             ?              ; Variable para condición izquierda
 @ifD           dd             ?              ; Variable para condición derecha
 
@@ -147,8 +149,6 @@ jmp branch41
 
 branch58:
 
-displayString S_end_4
-NEWLINE
 fld a
 fstp @ifI
 
@@ -165,7 +165,7 @@ fxch
 fcom
 fstsw AX
 sahf
-jb branch82
+jb branch80
 
 fld a
 fstp @ifI
@@ -185,16 +185,21 @@ fxch
 fcom
 fstsw AX
 sahf
-ja branch82
+ja branch80
 
-displayString S_between_5
+displayString S_between_4
 NEWLINE
-branch82:
+branch80:
 
-fld _35
-fstp a
-
-displayFloat a,2
+displayString S_Ingrese_un_int_5
+NEWLINE
+GetFloat d
+NEWLINE
+displayString S_Int_que_usted_ingreso__6
+NEWLINE
+displayFloat d,2
+NEWLINE
+displayString S_fin_del_programa_7
 NEWLINE
 
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución

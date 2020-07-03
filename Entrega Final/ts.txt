@@ -2,6 +2,7 @@ NOMBRE                        TIPODATO                      VALOR               
 a                             INT                           --                            1
 b                             INT                           --                            1
 c                             INT                           --                            1
+d                             INT                           --                            1
 _1                            CONST_INT                     1                             1
 _3                            CONST_INT                     3                             1
 _2                            CONST_INT                     2                             1
@@ -12,7 +13,8 @@ _0                            CONST_INT                     0                   
 S_false_2                     CONST_STR                     "false"                       5
 _10                           CONST_INT                     10                            2
 S_a_es_menor_a_diez_3         CONST_STR                     "a es menor a diez"           17
-S_end_4                       CONST_STR                     "end"                         3
 _30                           CONST_INT                     30                            2
-S_between_5                   CONST_STR                     "between"                     7
-_35                           CONST_INT                     35                            2
+S_between_4                   CONST_STR                     "between"                     7
+S_Ingrese_un_int_5            CONST_STR                     "Ingrese un int"              14
+S_Int_que_usted_ingreso__6    CONST_STR                     "Int que usted ingreso:"      22
+S_fin_del_programa_7          CONST_STR                     "fin del programa"            16
