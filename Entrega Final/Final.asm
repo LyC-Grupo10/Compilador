@@ -17,11 +17,10 @@ _7             dd             7.0            ; Constante int
 _5             dd             5.0            ; Constante int
 S_true_1                      db             "true", '$', 4 dup (?); Constante string
 _0             dd             0.0            ; Constante int
-S_true2_2                     db             "true2", '$', 5 dup (?); Constante string
-S_false_3                     db             "false", '$', 5 dup (?); Constante string
+S_false_2                     db             "false", '$', 5 dup (?); Constante string
 _10            dd             10.0           ; Constante int
-S_a_es_menor_a_diez_4         db             "a es menor a diez", '$', 17 dup (?); Constante string
-S_end_5                       db             "end", '$', 3 dup (?); Constante string
+S_a_es_menor_a_diez_3         db             "a es menor a diez", '$', 17 dup (?); Constante string
+S_end_4                       db             "end", '$', 3 dup (?); Constante string
 @ifI           dd             ?              ; Variable para condición izquierda
 @ifD           dd             ?              ; Variable para condición derecha
 
@@ -110,11 +109,11 @@ fstsw AX
 sahf
 jne branch39
 
-displayString S_true2_2
+displayString S_true_1
 NEWLINE
 branch39:
 
-displayString S_false_3
+displayString S_false_2
 NEWLINE
 branch41:
 
@@ -134,7 +133,7 @@ jae branch58
 
 displayFloat a,2
 NEWLINE
-displayString S_a_es_menor_a_diez_4
+displayString S_a_es_menor_a_diez_3
 NEWLINE
 fld a
 fld _1
@@ -147,7 +146,7 @@ branch58:
 
 displayFloat a,2
 NEWLINE
-displayString S_end_5
+displayString S_end_4
 NEWLINE
 
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución

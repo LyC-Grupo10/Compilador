@@ -31,7 +31,6 @@ typedef struct s_simbolo
         struct s_simbolo *next;
 }t_simbolo;
 
-
 typedef struct
 {
         t_simbolo *primero;
@@ -48,13 +47,20 @@ char* reemplazarString(char*, const char*);
 t_tabla tablaTS;
 
 char idvec[32][50];
-int cantid = 0, i=0, contadorString=0;
-char vecAux[20];
+int cantid = 0, i=0, contadorString = 0;
+char vecAux[20], vecAsignacion[30][50];
 char* punt;
 
 /* --- Validaciones --- */
 int existeID(const char*);
 int esNumero(const char*, char*);
+void guardarAsignacion(const char*);
+void guardarAsignacionInt(const int);
+void guardarAsignacionDouble(const double);
+bool verificarAsignacion(const char*);
+bool verificarComparacion();
+bool esCompatible(const char*, const char*);
+int esAsig = 0, esComp = 0, topeAsignacion = -1;
 char mensajes[100];
 
 /* ---  Polaca   --- */
@@ -158,7 +164,7 @@ char *tipo_str;
 
 PROGRAMA:
         bloque_declaraciones algoritmo
-        { /*guardarTS(); */grabarPolaca(); generarAssembler(); guardarTS(); printf("\nCompilacion OK! Ver archivo Final.asm\n\n"); }
+        { grabarPolaca(); generarAssembler(); guardarTS(); printf("\nCompilacion OK! Ver archivo Final.asm\n\n"); }
         ;
 
 bloque_declaraciones:
@@ -172,9 +178,9 @@ declaraciones:
 
 declaracion:
              INT DOSPUNTOS lista_variables  {
-                                                for(i=0; i<cantid; i++) //vamos agregando todos los ids que leyo
+                                                for(i=0; i<cantid; i++)
                                                 {
-                                                    if(insertarTS(idvec[i], "INT", "", 0, 0) != 0) //no lo guarda porque ya existe
+                                                    if(insertarTS(idvec[i], "INT", "", 0, 0) != 0)
                                                     {
                                                         sprintf(mensajes, "%s%s%s", "Error: la variable '", idvec[i], "' ya fue declarada");
                                                         yyerror(mensajes, @3.first_line, @3.first_column, @3.last_column);
@@ -212,7 +218,7 @@ lista_variables:
                         cantid++;
                     }
                 | ID {
-                        strcpy(vecAux, yylval.tipo_str); /*se repite aca tambien, no lo toma de arriba*/
+                        strcpy(vecAux, yylval.tipo_str); /*se repite por cada vez que se usa un No Terminal*/
                         punt = strtok(vecAux, " ;\n");
                         strcpy(idvec[cantid], punt);
                         cantid++;
@@ -231,8 +237,8 @@ bloque:
 
 sentencia:
             asignacion
-            | { local++; } seleccion 
-            | { local++; } iteracion
+            | { local++; esComp = 1;} seleccion 
+            | { local++; esComp = 1;} iteracion
             | salida
             | entrada
             ;
@@ -253,7 +259,7 @@ salida:
                                         yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                                     }
                                     insertarPolaca("DISPLAY");
-                                    insertarPolaca(vecAux);                                 
+                                    insertarPolaca(vecAux);                               
                                 }
         ;
 
@@ -271,16 +277,23 @@ entrada:
         ;        
 
 asignacion:
-            ID OP_ASIG expresion PUNTOYCOMA {
+            ID OP_ASIG { esAsig = 1; } expresion PUNTOYCOMA {
                                                 strcpy(vecAux, $1); /*en $1 esta el valor de ID*/
-                                                punt = strtok(vecAux," +-*/[](){}:=,\n"); /*porque puede venir de cualquier lado, pero ver si funciona solo con el =*/
+                                                punt = strtok(vecAux," +-*/[](){}:=,\n");
                                                 if(!existeID(punt))
                                                 {
                                                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                                                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                                                 }
+                                                //Verifica que los tipos de datos sean compatibles
+                                                if(!verificarAsignacion(punt))
+                                                {
+                                                    sprintf(mensajes, "%s", "Error: se hacen asignaciones de distinto tipo de datos");
+                                                    yyerror(mensajes, @1.first_line, @1.first_column, @5.last_column);
+                                                }
                                                 insertarPolaca("=");
-                                                insertarPolaca(punt); //ya tiene el cambiazo loco para asm
+                                                insertarPolaca(punt);
+                                                esAsig = 0; topeAsignacion = -1;
                                             }
             ;
 
@@ -330,20 +343,74 @@ condicion:
             ;
 
 //Acá vemos si es un or, en tal caso, se setea a la comparación anterior la celda a la que tiene que saltar para ir al bloque true.
-comparacion:
-            expresion COMP_BEQ { insertarPolaca("CMP"); } expresion { insertarPolaca("BNE");
-                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BLE { insertarPolaca("CMP"); } expresion { insertarPolaca("BGT");
-                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BGE { insertarPolaca("CMP"); } expresion { insertarPolaca("BLT");
-                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BGT { insertarPolaca("CMP"); } expresion { insertarPolaca("BLE");
-                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BLT { insertarPolaca("CMP"); } expresion { insertarPolaca("BGE");
-                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | expresion COMP_BNE { insertarPolaca("CMP"); } expresion { insertarPolaca("BEQ");
-                                            if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
-            | between {delta += 2;} //aca suma de a dos porque between tiene dos comparaciones
+comparacion: 
+            expresionNumerica COMP_BEQ { insertarPolaca("CMP"); } expresionNumerica
+            {
+                if(!verificarComparacion())
+                {
+                    sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+                    yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+                }
+                esComp = 0; topeAsignacion = -1;
+                insertarPolaca("BNE"); if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+            | expresionNumerica COMP_BLE { insertarPolaca("CMP"); } expresionNumerica
+            {
+                if(!verificarComparacion())
+                {
+                    sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+                    yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+                }
+                esComp = 0; topeAsignacion = -1;
+                insertarPolaca("BGT"); if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+
+            | expresionNumerica COMP_BGE { insertarPolaca("CMP"); } expresionNumerica
+            {
+                if(!verificarComparacion())
+                {
+                    sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+                    yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+                }
+                esComp = 0; topeAsignacion = -1;
+                insertarPolaca("BLT"); if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+
+            | expresionNumerica COMP_BGT { insertarPolaca("CMP"); } expresionNumerica
+            {
+                if(!verificarComparacion())
+                {
+                    sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+                    yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+                }
+                esComp = 0; topeAsignacion = -1;
+                insertarPolaca("BLE"); if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+
+            | expresionNumerica COMP_BLT { insertarPolaca("CMP"); } expresionNumerica
+            {
+                if(!verificarComparacion())
+                {
+                    sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+                    yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+                }
+                esComp = 0; topeAsignacion = -1;
+                insertarPolaca("BGE"); if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+
+            | expresionNumerica COMP_BNE { insertarPolaca("CMP"); } expresionNumerica
+            {
+                if(!verificarComparacion())
+                {
+                    sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+                    yyerror(mensajes, @1.first_line, @1.first_column, @4.last_column);
+                }
+                esComp = 0; topeAsignacion = -1;
+                insertarPolaca("BEQ"); if(hayOr){insertarPolacaEnPosicion(pedirPos(), posActual +1); hayOr=0;} guardarPos(); delta++;}
+
+            | between {
+                if(!verificarComparacion())
+                {
+                    sprintf(mensajes, "%s", "Error: se hacen comparaciones con distintos tipos de datos");
+                    yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                }
+                esComp = 0; topeAsignacion = -1;
+                delta += 2;} //aca suma de a dos porque between tiene dos comparaciones
             ;
 
 expresion:
@@ -367,11 +434,14 @@ factor:
                     sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                 }
+                if(esAsig == 1)
+                    guardarAsignacion(punt);
+                
                 insertarPolaca(punt);
            }
-        | CONST_INT { $<tipo_int>$ = $1; insertarPolacaInt($<tipo_int>$);}
-        | CONST_REAL { $<tipo_double>$ = $1; insertarPolacaDouble($<tipo_double>$);}
-        | CONST_STR { $<tipo_str>$ = $1; insertarPolaca($<tipo_str>$);}
+        | CONST_INT { $<tipo_int>$ = $1; if(esAsig == 1){guardarAsignacionInt($<tipo_int>$);} insertarPolacaInt($<tipo_int>$);}
+        | CONST_REAL { $<tipo_double>$ = $1; if(esAsig == 1){guardarAsignacionDouble($<tipo_double>$);} insertarPolacaDouble($<tipo_double>$);}
+        | CONST_STR { $<tipo_str>$ = $1; if(esAsig == 1){guardarAsignacion($<tipo_str>$);} insertarPolaca($<tipo_str>$);}
         | PAR_A expresion PAR_C
         | combinatorio
         | factorial
@@ -404,7 +474,6 @@ factorial:
 
 between:
         BETWEEN PAR_A ID {
-                            //ver que sea una variable numérica
                             char error[50];
                             strcpy(vecAux, $3);
                             punt = strtok(vecAux," ;\n");
@@ -414,6 +483,8 @@ between:
                                 yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                             }
                             strcpy(auxBet, insertarPolaca(punt));
+                            if(esComp == 1)
+                                guardarAsignacion(punt);
                         }
         COMA COR_A expresionNumerica { insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos(); }
         PUNTOYCOMA { insertarPolaca(auxBet); }
@@ -443,10 +514,11 @@ factorNumerico:
                     sprintf(mensajes, "%s", error);
                     yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
                 }
+                if(esAsig == 1 || esComp == 1){guardarAsignacion(punt);}
                 insertarPolaca(punt);
            }
-        | CONST_INT { $<tipo_int>$ = $1; insertarPolacaInt($<tipo_int>$); }
-        | CONST_REAL { $<tipo_double>$ = $1; insertarPolacaDouble($<tipo_double>$); }
+        | CONST_INT { $<tipo_int>$ = $1; if(esAsig == 1 || esComp == 1){guardarAsignacionInt($<tipo_int>$);} insertarPolacaInt($<tipo_int>$); }
+        | CONST_REAL { $<tipo_double>$ = $1; if(esAsig == 1 || esComp == 1){guardarAsignacionDouble($<tipo_double>$);} insertarPolacaDouble($<tipo_double>$); }
         | PAR_A expresionNumerica PAR_C
         | combinatorio
         | factorial
@@ -487,6 +559,13 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
         if(strcmp(tabla->data.nombre, nombre) == 0 || strcmp(tabla->data.nombre, nombreCTE) == 0)
         {
             return 1;
+        }
+        else if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
+        {
+            if(strcmp(tabla->data.valor.valor_str, valString) == 0)
+            {
+                return 1;
+            }
         }
         
         if(tabla->next == NULL)
@@ -549,24 +628,19 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
         return data;
     }
     else
-    {   //Son constantes: tenemos que agregarlos a la tabla con "_" al comienzo del nombre, hay que agregarle el valor
+    {
         if(strcmp(tipo, "CONST_STR") == 0)
         {
             contadorString++;
             
             data->valor.valor_str = (char*)malloc(sizeof(char) * (strlen(valString) + 1));
             strcpy(data->valor.valor_str, valString);
-            //data->nombre = (char*)malloc(sizeof(char) * (strlen(nombre) + 1));
-            //strcat(full, nombre);
-            //strcpy(data->nombre, full);    
 
-            //Esto es para el ASM
             char auxString[32];
             strcpy(full, ""); 
             strcpy(full, "S_");  // "S_"
             reemplazarString(auxString, nombre);
             strcat(full, auxString); // "S_<nombre>"  
-
             char numero[10];
             sprintf(numero, "_%d", contadorString);
             strcat(full, numero); // "S_<nombre>_#"
@@ -574,10 +648,7 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             data->nombre = (char*)malloc(sizeof(char) * (strlen(full) + 1));
             data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
             strcpy(data->nombre, full);
-            //printf("CONST_STR:\nData -> Nombre: <%s>\n", data->nombre);
             strcpy(data->nombreASM, data->nombre);
-            //printf("CONST_STR:\nData -> NombreASM: <%s>\n", data->nombreASM);
-            //printf("CONST_STR:\nData -> Valor str: <%s>\n", data->valor.valor_str);
         }
         if(strcmp(tipo, "CONST_REAL") == 0)
         {
@@ -586,16 +657,10 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             strcat(full, aux);
             data->nombre = (char*)malloc(sizeof(char) * strlen(full) + 1);
             strcpy(data->nombre, full);
-            
-            //printf("CONST_REAL:\nData -> Nombre: <%s>\n", data->nombre);
             data->valor.valor_double = valDouble;
-            
-            //printf("CONST_REAL:\nData -> Valor double: <%f>\n", data->valor.valor_double);
-
             reemplazarChar(dest, full, '.', '_');
             data->nombreASM = (char*)malloc(sizeof(char) * (strlen(dest) + 1));
             strcpy(data->nombreASM, dest);
-           // printf("CONST_REAL:\nData -> NombreASM: <%s>\n", data->nombreASM);
         }
         if(strcmp(tipo, "CONST_INT") == 0)
         {
@@ -603,12 +668,9 @@ t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, 
             strcat(full, aux);
             data->nombre = (char*)malloc(sizeof(char) * (strlen(full) + 1));
             strcpy(data->nombre, full);
-            //printf("CONST_INT:\nData -> Nombre: <%s>\n", data->nombre);
             data->valor.valor_int = valInt;
-            //printf("CONST_INT:\nData -> Valor int: <%d>\n", data->valor.valor_int);
             data->nombreASM = (char*)malloc(sizeof(char) * (strlen(full) + 1));
             strcpy(data->nombreASM, full);
-            //printf("CONST_INT:\nData -> NombreASM: <%s>\n", data->nombreASM);
         }
         return data;
     }
@@ -637,7 +699,7 @@ void guardarTS()
         aux = tabla;
         tabla = tabla->next;
         
-        if(strcmp(aux->data.tipo, "INT") == 0) //variable int
+        if(strcmp(aux->data.tipo, "INT") == 0)
         {
             sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
         }
@@ -688,20 +750,13 @@ t_simbolo * getLexema(const char *valor){
         esCTE = strcmp(tablaSimbolos->data.nombre, nombreCTE);
         esASM = strcmp(tablaSimbolos->data.nombreASM, valor);
 
-        if(strcmp(tablaSimbolos->data.tipo, "CONST_REAL") == 0)
-        {
-            sprintf(valorFloat, "%.10f", tablaSimbolos->data.valor.valor_double);
-            esValor = strcmp(valorFloat, valor);
-            //printf("Comparo Busqueda <%s> con Lexema <%s> y esValor = <%d>\n", valor, valorFloat, esValor);
-        }
-        else if(strcmp(tablaSimbolos->data.tipo, "CONST_STR") == 0)
+        if(strcmp(tablaSimbolos->data.tipo, "CONST_STR") == 0)
         {
             esValor = strcmp(valor, tablaSimbolos->data.valor.valor_str);
-            //printf("Comparo Busqueda <%s> con Lexema <%s> y esValor = <%d>\n", valor, tablaSimbolos->data.valor.valor_str, esValor);
         }
 
-
-        if(esID == 0 || esCTE == 0 || esASM==0 || esValor == 0){
+        if(esID == 0 || esCTE == 0 || esASM == 0 || esValor == 0)
+        { 
             lexema = tablaSimbolos;
             return lexema;
         }
@@ -724,19 +779,13 @@ int existeID(const char* id)
         b2 = strcmp(tabla->data.nombre, nombreCTE);
         b3 = strcmp(tabla->data.nombreASM, id);
 
-        if(strcmp(tabla->data.tipo, "CONST_REAL") == 0)
-        {
-            sprintf(valor, "%.10f", tabla->data.valor.valor_double);
-            b4 = strcmp(valor, id);
-            //printf("EXISTE ID: CONST REAL\nValor en TS: <%s> | Lo que busco: <%s> | b4 = <%d>\n", valor, id, b4);
-        }
-        else if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
+        if(strcmp(tabla->data.tipo, "CONST_STR") == 0)
         {
             b4 = strcmp(tabla->data.valor.valor_str, id);
-            //printf("EXISTE ID: CONST STR\nValor en TS: <%s> | Lo que busco: <%s> | b4 = <%d>\n", tabla->data.valor.valor_str, id, b4);
         }
-        
-        if(b1 == 0 || b2 == 0 || b3 == 0 || b4 == 0){
+
+        if(b1 == 0 || b2 == 0 || b3 == 0 || b4 == 0)
+        {
             return 1;
         }
         tabla = tabla->next;
@@ -770,11 +819,82 @@ int esNumero(const char* id,char* error)
     return 0;
 }
 
+void guardarAsignacion(const char* id)
+{
+    topeAsignacion++;
+    strcpy(vecAsignacion[topeAsignacion], id);
+}
+
+void guardarAsignacionInt(const int id)
+{
+    char aux[32];
+    sprintf(aux, "%d", id);
+    guardarAsignacion(aux);
+}
+
+void guardarAsignacionDouble(const double id)
+{
+    char aux[32];
+    sprintf(aux, "%g", id);
+    guardarAsignacion(aux);
+}
+
+bool verificarAsignacion(const char* id)
+{
+    t_simbolo* lexemaI = getLexema(id);
+    t_simbolo* lexemaD;
+    int i;
+
+    for(i=0; i<=topeAsignacion; i++)
+    {
+        lexemaD = getLexema(vecAsignacion[i]);
+        if(!esCompatible(lexemaI->data.tipo, lexemaD->data.tipo))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool verificarComparacion()
+{
+    int i;
+    t_simbolo* lex;
+    if(topeAsignacion >= 0)
+        lex = getLexema(vecAsignacion[0]);
+
+    for(i=1; i<=topeAsignacion; i++)
+    {
+        t_simbolo* lex2 = getLexema(vecAsignacion[i]);
+        if(!esCompatible(lex->data.tipo, lex2->data.tipo))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool esCompatible(const char* tipo1, const char* tipo2)
+{
+    if(strcmp("INT", tipo1) == 0)
+    {
+        return (strcmp("INT", tipo2) == 0 || strcmp("CONST_INT", tipo2) == 0);
+    }
+    else if(strcmp("FLOAT", tipo1) == 0)
+    {
+        return (strcmp("FLOAT", tipo2) == 0 || strcmp("CONST_REAL", tipo2) == 0);
+    }
+    else if(strcmp("STRING", tipo1) == 0)
+    {
+        return (strcmp("STRING", tipo2) == 0 || strcmp("CONST_STR", tipo2) == 0);
+    }
+}
+
+
 /*    Funciones extras    */
 
 char* limpiarString(char* dest, const char* cad)
 {
-    //Sacarle las comillas a cad
     int i, longitud, j=0;
     longitud = strlen(cad);
     for(i=0; i<longitud; i++)
@@ -845,7 +965,7 @@ void insertarPolacaInt(int entero){
 
 void insertarPolacaDouble(double real){
 	char cad[20];
-	sprintf(cad,"%.10f", real);
+    sprintf(cad,"%g", real);
 	insertarPolaca(cad);
 }
 
@@ -861,7 +981,7 @@ void imprimirPolaca(){
 }
 
 void guardarPos(){
-	topePila++; // tope=-1 significa pila vacía, el primer elemento de la pila esta en tope=0
+	topePila++;
 	pilaPolaca[topePila]=posActual;
 	posActual++;
 }

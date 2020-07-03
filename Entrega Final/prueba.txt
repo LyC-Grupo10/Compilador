@@ -14,7 +14,7 @@ if (a >= 7 or a == 5){
 }
 else{
     if (a < 1 and a == 0){
-        display "true2";
+        display "true";
     }   
     display "false";
 }
