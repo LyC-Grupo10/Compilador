@@ -930,26 +930,33 @@ void notCondicion(int cant) //aca le pasamos por parametro el delta correspondie
 
 /*    Funciones extras    */
 
-void calcularFactorial(char * var, char * res)
-{	
+void calcularFactorial(char * var, char * res){	
 	insertarTS(var, "INT", "", 0, 0);
     insertarTS("@auxFact", "INT", "", 0, 0);
     insertarTS(res, "INT", "", 0, 0);
+    insertarTS("1", "CONST_INT", "", 1, 0);    
+    insertarTS("2", "CONST_INT", "", 2, 0);
 
     insertarPolaca("="); insertarPolaca(var); 
     insertarPolaca(var); insertarPolaca("="); insertarPolaca("@auxFact");
     insertarPolaca(var); insertarPolaca("=");  insertarPolaca(res); 
     
-    insertarPolaca("ET"); posActual--; guardarPos(); 
-    insertarPolaca("@auxFact"); insertarPolaca("CMP"); insertarPolacaInt(2); insertarPolaca("BLE"); guardarPos();
+    insertarPolaca("@auxFact"); insertarPolaca("CMP"); insertarPolacaInt(1); insertarPolaca("BGT"); guardarPos(); //Inicio del primer if
+
+    insertarPolacaInt(1); insertarPolaca("="); insertarPolaca(res);
+    insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); guardarPos();
+
+    insertarPolaca("ET"); posActual--; guardarPos(); //Inicio del while
+    insertarPolaca("@auxFact"); insertarPolaca("CMP"); insertarPolacaInt(2); insertarPolaca("BLE"); guardarPos(); //Inicio del segundo if
     
     insertarPolaca(res); insertarPolaca("@auxFact"); insertarPolacaInt(1);
     insertarPolaca("-"); insertarPolaca("*"); insertarPolaca("="); insertarPolaca(res);
     insertarPolaca("@auxFact"); insertarPolacaInt(1); insertarPolaca("-"); insertarPolaca("="); insertarPolaca("@auxFact");
     
-    insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); insertarPolacaInt(pedirPos());
+    insertarPolaca("BI"); insertarPolacaEnPosicion(pedirPos(), posActual + 1); //Fin del segundo if
+    insertarPolacaInt(pedirPos()); //Fin del while
+    insertarPolacaEnPosicion(pedirPos(), posActual); //Fin del primer if
 }
-
 
 /* --- Funciones para Assembler --- */
 
