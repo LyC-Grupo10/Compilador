@@ -941,7 +941,7 @@ void calcularFactorial(char * var, char * res)
     insertarPolaca(var); insertarPolaca("=");  insertarPolaca(res); 
     
     insertarPolaca("ET"); posActual--; guardarPos(); 
-    insertarPolaca("@auxFact"); insertarPolacaInt(2); insertarPolaca("CMP"); insertarPolaca("BLE"); guardarPos();
+    insertarPolaca("@auxFact"); insertarPolaca("CMP"); insertarPolacaInt(2); insertarPolaca("BLE"); guardarPos();
     
     insertarPolaca(res); insertarPolaca("@auxFact"); insertarPolacaInt(1);
     insertarPolaca("-"); insertarPolaca("*"); insertarPolaca("="); insertarPolaca(res);
@@ -1038,7 +1038,7 @@ bool esPosicionDeEtiqueta(int posicion){
     return false;
 }
 
-bool esEtiquetaWhile(const char *){
+bool esEtiquetaWhile(const char *str){
     return strcmp(str, "ET") == 0;
 }
 
