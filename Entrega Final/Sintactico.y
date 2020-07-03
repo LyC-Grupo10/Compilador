@@ -485,10 +485,12 @@ between:
                             strcpy(auxBet, insertarPolaca(punt));
                             if(esComp == 1)
                                 guardarAsignacion(punt);
+
+                             insertarPolaca("CMP"); 
                         }
-        COMA COR_A expresionNumerica { insertarPolaca("CMP"); insertarPolaca("BLT"); guardarPos(); }
-        PUNTOYCOMA { insertarPolaca(auxBet); }
-        expresionNumerica { insertarPolaca("CMP"); insertarPolaca("BGT"); guardarPos(); }
+        COMA COR_A expresionNumerica { insertarPolaca("BLT"); guardarPos(); }
+        PUNTOYCOMA { insertarPolaca(auxBet); insertarPolaca("CMP"); }
+        expresionNumerica { insertarPolaca("BGT"); guardarPos(); }
         COR_C PAR_C
         ; 
 
@@ -1081,7 +1083,7 @@ void generarAssembler(){
     crearSeccionCode(archAssembler);
 
     int i;
-    for(i=0; i<posActual; i++){
+    for(i=0; i<=posActual; i++){
 
         if(esPosicionDeEtiqueta(i) || esEtiquetaWhile(vecPolaca[i])){
             fprintf(archAssembler, "branch%d:\n\n", i);

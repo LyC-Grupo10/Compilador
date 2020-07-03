@@ -13,3 +13,6 @@ S_false_2                     CONST_STR                     "false"             
 _10                           CONST_INT                     10                            2
 S_a_es_menor_a_diez_3         CONST_STR                     "a es menor a diez"           17
 S_end_4                       CONST_STR                     "end"                         3
+_30                           CONST_INT                     30                            2
+S_between_5                   CONST_STR                     "between"                     7
+_35                           CONST_INT                     35                            2

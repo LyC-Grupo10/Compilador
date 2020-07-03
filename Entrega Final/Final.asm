@@ -21,6 +21,9 @@ S_false_2                     db             "false", '$', 5 dup (?); Constante 
 _10            dd             10.0           ; Constante int
 S_a_es_menor_a_diez_3         db             "a es menor a diez", '$', 17 dup (?); Constante string
 S_end_4                       db             "end", '$', 3 dup (?); Constante string
+_30            dd             30.0           ; Constante int
+S_between_5                   db             "between", '$', 7 dup (?); Constante string
+_35            dd             35.0           ; Constante int
 @ifI           dd             ?              ; Variable para condición izquierda
 @ifD           dd             ?              ; Variable para condición derecha
 
@@ -144,9 +147,54 @@ jmp branch41
 
 branch58:
 
-displayFloat a,2
-NEWLINE
 displayString S_end_4
+NEWLINE
+fld a
+fstp @ifI
+
+fld b
+fld _2
+fmul
+fld _30
+fadd
+fstp @ifD
+
+fld @ifI
+fld @ifD
+fxch
+fcom
+fstsw AX
+sahf
+jb branch82
+
+fld a
+fstp @ifI
+
+fld a
+fld b
+fadd
+fld c
+fadd
+fld _2
+fmul
+fstp @ifD
+
+fld @ifI
+fld @ifD
+fxch
+fcom
+fstsw AX
+sahf
+ja branch82
+
+displayString S_between_5
+NEWLINE
+branch82:
+
+fld _35
+fstp a
+
+displayFloat a,2
 NEWLINE
 
 mov AX,4C00h                  ; Indica que debe finalizar la ejecución

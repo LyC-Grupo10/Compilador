@@ -25,8 +25,13 @@ while(a < 10){
     a = a + 1;
 }
 
-display a;
-
 display "end";
+
+if(between(a, [b*2+30;(a+b+c)*2]))
+{
+	display "between";
+}
+a = 35;
+display a;
 
 ENDP
