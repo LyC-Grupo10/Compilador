@@ -247,9 +247,9 @@ sentencia:
 salida:
         DISPLAY CONST_STR PUNTOYCOMA {                                     
                                         strcpy(vecAux, $2);
-                                        strtok(vecAux,";\n");
+                                        punt = strtok(vecAux,";\n");
                                         insertarPolaca("DISPLAY");
-                                        insertarPolaca(vecAux);
+                                        insertarPolaca(punt);
                                      }
         | DISPLAY ID PUNTOYCOMA {
                                     char error[50];                                   
@@ -257,10 +257,10 @@ salida:
                                     punt = strtok(vecAux," ;\n");
                                     if(!esNumero(punt, error)) {
                                         sprintf(mensajes, "%s", error);
-                                        yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                                        yyerror(mensajes, @1.first_line, @2.first_column, @2.last_column);
                                     }
                                     insertarPolaca("DISPLAY");
-                                    insertarPolaca(vecAux);                               
+                                    insertarPolaca(punt);                               
                                 }
         ;
 
@@ -270,10 +270,10 @@ entrada:
                             punt = strtok(vecAux," ;\n");
                             if(!existeID(punt)) {
                                 sprintf(mensajes, "%s%s%s", "Error: no se declaro la variable '", punt, "'");
-                                yyerror(mensajes, @1.first_line, @1.first_column, @1.last_column);
+                                yyerror(mensajes, @1.first_line, @2.first_column, @2.last_column);
                             }
                             insertarPolaca("GET");
-                            insertarPolaca(vecAux);
+                            insertarPolaca(punt);
                         }
         ;        
 
@@ -611,7 +611,7 @@ int insertarTS(const char *nombre, const char *tipo, const char* valString, int 
 
 t_data* crearDatos(const char *nombre, const char *tipo, const char* valString, int valInt, double valDouble)
 {
-    char full[32] = "_";
+    char full[50] = "_";
     char aux[20];
 
     t_data *data = (t_data*)calloc(1, sizeof(t_data));
@@ -692,7 +692,7 @@ void guardarTS()
     else if(tablaTS.primero == NULL)
             return;
     
-    fprintf(arch, "%-30s%-30s%-30s%-30s\n", "NOMBRE", "TIPODATO", "VALOR", "LONGITUD");
+    fprintf(arch, "%-35s%-30s%-30s%-30s\n", "NOMBRE", "TIPODATO", "VALOR", "LONGITUD");
 
     t_simbolo *aux;
     t_simbolo *tabla = tablaTS.primero;
@@ -705,27 +705,27 @@ void guardarTS()
         
         if(strcmp(aux->data.tipo, "INT") == 0)
         {
-            sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
+            sprintf(linea, "%-35s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "CONST_INT") == 0)
         {
-            sprintf(linea, "%-30s%-30s%-30d%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre) -1);
+            sprintf(linea, "%-35s%-30s%-30d%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_int, strlen(aux->data.nombre) -1);
         }
         else if(strcmp(aux->data.tipo, "FLOAT") ==0)
         {
-            sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
+            sprintf(linea, "%-35s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "CONST_REAL") == 0)
         {
-            sprintf(linea, "%-30s%-30s%-30g%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre) -1);
+            sprintf(linea, "%-35s%-30s%-30g%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_double, strlen(aux->data.nombre) -1);
         }
         else if(strcmp(aux->data.tipo, "STRING") == 0)
         {
-            sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
+            sprintf(linea, "%-35s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, "--", strlen(aux->data.nombre));
         }
         else if(strcmp(aux->data.tipo, "CONST_STR") == 0)
         {
-            sprintf(linea, "%-30s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) -2);
+            sprintf(linea, "%-35s%-30s%-30s%-d\n", aux->data.nombre, aux->data.tipo, aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) -2);
         }
         fprintf(arch, "%s", linea);
         free(aux);
@@ -1169,7 +1169,7 @@ void generarAssembler(){
         }
         else if(esAsignacion(vecPolaca[i])){
             i++;
-            fprintf(archAssembler, "fstp %s\n\n", vecPolaca[i]);          
+            fprintf(archAssembler, "fstp %s\n\n", vecPolaca[i]);
         }
         else if(esOperacion(vecPolaca[i])){
             fprintf(archAssembler, "%s\n", getOperacion(vecPolaca[i]));
@@ -1239,7 +1239,7 @@ void crearSeccionData(FILE *archAssembler){
         else if(strcmp(aux->data.tipo, "CONST_STR") == 0){
             char valor[50];
             sprintf(valor, "%s, '$', %d dup (?)",aux->data.valor.valor_str, strlen(aux->data.valor.valor_str) - 2);
-            fprintf(archAssembler, "%-30s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", valor, "; Constante string");
+            fprintf(archAssembler, "%-35s%-15s%-15s%-15s\n", aux->data.nombreASM, "db", valor, "; Constante string");
         }
     }
     fprintf(archAssembler, "%-15s%-15s%-15s%-15s\n", "@ifI", "dd", "?", "; Variable para condición izquierda");

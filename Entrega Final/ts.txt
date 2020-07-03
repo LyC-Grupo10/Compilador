@@ -1,20 +1,27 @@
-NOMBRE                        TIPODATO                      VALOR                         LONGITUD                      
-a                             INT                           --                            1
-b                             INT                           --                            1
-c                             INT                           --                            1
-d                             INT                           --                            1
-_1                            CONST_INT                     1                             1
-_3                            CONST_INT                     3                             1
-_2                            CONST_INT                     2                             1
-_7                            CONST_INT                     7                             1
-_5                            CONST_INT                     5                             1
-S_true_1                      CONST_STR                     "true"                        4
-_0                            CONST_INT                     0                             1
-S_false_2                     CONST_STR                     "false"                       5
-_10                           CONST_INT                     10                            2
-S_a_es_menor_a_diez_3         CONST_STR                     "a es menor a diez"           17
-_30                           CONST_INT                     30                            2
-S_between_4                   CONST_STR                     "between"                     7
-S_Ingrese_un_int_5            CONST_STR                     "Ingrese un int"              14
-S_Int_que_usted_ingreso__6    CONST_STR                     "Int que usted ingreso:"      22
-S_fin_del_programa_7          CONST_STR                     "fin del programa"            16
+NOMBRE                             TIPODATO                      VALOR                         LONGITUD                      
+a                                  INT                           --                            1
+b                                  INT                           --                            1
+c                                  INT                           --                            1
+d                                  INT                           --                            1
+e                                  INT                           --                            1
+f                                  FLOAT                         --                            1
+z                                  STRING                        --                            1
+_1                                 CONST_INT                     1                             1
+_30                                CONST_INT                     30                            2
+_2                                 CONST_INT                     2                             1
+_7                                 CONST_INT                     7                             1
+_5                                 CONST_INT                     5                             1
+S_true_1                           CONST_STR                     "true"                        4
+_23.11                             CONST_REAL                    23.11                         5
+_102.3                             CONST_REAL                    102.3                         5
+_0.3                               CONST_REAL                    0.3                           3
+S_false_2                          CONST_STR                     "false"                       5
+_10                                CONST_INT                     10                            2
+S_a_es_menor_a_diez_3              CONST_STR                     "a es menor a diez"           17
+S_between_4                        CONST_STR                     "between"                     7
+_3                                 CONST_INT                     3                             1
+@varFact                           INT                           --                            8
+@auxFact                           INT                           --                            8
+@resFact                           INT                           --                            8
+S_El_factorial_es__5               CONST_STR                     "El factorial es:"            16
+S_fin_del_programa_6               CONST_STR                     "fin del programa"            16

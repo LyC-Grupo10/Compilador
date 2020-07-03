@@ -1,19 +1,22 @@
 DEFVAR
-int: a; b; c; d
+int: a; b; c; d; e
+float: f
+string: z
 ENDDEF
 
 BEGINP
 
 b = 1;
-c = 3;
+c = 30;
 
 a = b + c * 2;
 
 if (a >= 7 or a == 5){
     display "true";
+    f = 23.11;
 }
 else{
-    if (a < 1 and a == 0){
+    if (f < 102.3 and f == .3){
         display "true";
     }   
     display "false";
@@ -29,9 +32,8 @@ if(between(a, [b*2+30;(a+b+c)*2])){
 	display "between";
 }
 
-display "Ingrese un int";
-get d;
-display "Int que usted ingreso:";
+d = fact(2*3);
+display "El factorial es:";
 display d;
 
 display "fin del programa";
